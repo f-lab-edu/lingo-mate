@@ -27,11 +27,6 @@ class MemberControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @AfterEach
-    void after() {
-        memberRepository.clearStore();
-    }
-
     MemberForm createMemberForm() {
         MemberForm memberForm = new MemberForm();
         memberForm.setUsername("chanwu");
@@ -69,6 +64,7 @@ class MemberControllerTest {
         //Given
         MemberForm memberForm = createMemberForm();
         Member member = new Member(memberForm);
+        member.setId(1L);
 
         // Mock 동작 정의
         Mockito.when(memberRepository.findById(1L)).thenReturn(member);
