@@ -59,9 +59,10 @@ public class Question {
     }
 
     // 질문 댓글 수정
-    public void editComment(Comment createdComment, Long comment_id) {
+    public void editComment(CommentEditForm commentEditForm, Long comment_id) {
         Optional<Comment> comment = comments.stream().filter(c -> c.getId().equals(comment_id)).findFirst();
-        comments.set(comments.indexOf(comment.get()), createdComment);
+        Comment updatedComment = comment.get().editComment(commentEditForm);
+        comments.set(comments.indexOf(comment.get()), updatedComment);
     }
 
     // 질문 삭제
