@@ -33,7 +33,7 @@ public class Member {
         this.nationality = memberForm.getNationality();
         this.native_lang = memberForm.getNative_lang();
         this.introduction = memberForm.getIntroduction();
-        this.learning = new ArrayList<>();
+        this.learning = memberForm.getLearning();
         this.follower = 0;
         this.following = 0;
         this.point = 50;
