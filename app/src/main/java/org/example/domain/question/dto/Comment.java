@@ -14,6 +14,12 @@ public class Comment {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    public Comment editComment(CommentEditForm commentEditForm){
+        this.comment = commentEditForm.getComment();
+        this.updatedAt = LocalDateTime.now();
+        return this;
+    }
+
     public Comment(String content, String author) {
         this.id = ++sequence;
         this.comment = content;

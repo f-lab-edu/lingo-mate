@@ -3,10 +3,7 @@ package org.example.domain.question;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.domain.question.dto.Comment;
-import org.example.domain.question.dto.Question;
-import org.example.domain.question.dto.QuestionCreateForm;
-import org.example.domain.question.dto.QuestionEditForm;
+import org.example.domain.question.dto.*;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,10 +78,10 @@ public class QuestionController {
     @PutMapping("/{q_id}/comments/{c_id}")
     public Question editComment(@PathVariable(value = "q_id") Long question_id,
                                 @PathVariable(value = "c_id") Long comment_id,
-                            @Valid @ModelAttribute Comment createdComment,
+                            @Valid @ModelAttribute CommentEditForm commentEditForm,
                             BindingResult result) {
         Question question = questionRepository.findById(question_id);
-        question.editComment(createdComment, comment_id);
+        question.editComment(commentEditForm, comment_id);
         return question;
     }
 

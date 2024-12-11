@@ -172,11 +172,9 @@ class QuestionControllerTest {
         when(questionRepository.findById(1L)).thenReturn(question);
 
         mockMvc.perform(put("/question/{q_id}/comments/{c_id}",1L,1L)
-                .param("comment", "newComment")
-                .param("author", "lauren"))
+                .param("comment", "newComment"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.comments[0].comment").value("newComment"))
-                .andExpect(jsonPath("$.comments[0].author").value("lauren"));
+                .andExpect(jsonPath("$.comments[0].comment").value("newComment"));
     }
 
     @Test
