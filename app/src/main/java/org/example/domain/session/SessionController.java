@@ -19,6 +19,6 @@ public class SessionController {
         }
 
         session.getAttributeNames().asIterator().forEachRemaining(name -> log.info("name = {}, value = {}", name, session.getAttribute(name)));
-        return "세션 정보 출력";
+        return "세션 정보 로그 출력 완료";
     }
 }

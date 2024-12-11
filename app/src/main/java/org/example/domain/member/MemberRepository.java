@@ -11,11 +11,8 @@ import java.util.*;
 @Repository
 public class MemberRepository {
     private static Map<Long, Member> store = new HashMap<>();
-    private static long sequence = 0L;
 
     public Member save(Member member) {
-        // member.setId(++sequence);
-        log.info("save: member={}", member);
         store.put(member.getId(), member);
         return member;
     }

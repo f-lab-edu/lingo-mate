@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.domain.member.dto.Member;
 import org.example.domain.member.dto.MemberEditForm;
 import org.example.domain.member.dto.MemberForm;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,18 +23,24 @@ class MemberControllerTest {
     private MockMvc mockMvc;
     @MockitoBean
     private MemberRepository memberRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
 
+    // 테스트 회원 가입 폼 생성
     MemberForm createMemberForm() {
         MemberForm memberForm = new MemberForm();
-        memberForm.setUsername("chanwu");
         memberForm.setEmail("gdrffg@naver.com");
+        memberForm.setUsername("chanwu");
         memberForm.setPassword("1234");
         memberForm.setNationality("korean");
         memberForm.setNative_lang("english");
         memberForm.setIntroduction("Hello im chanwu");
         return memberForm;
+    }
+
+    // 테스트 회원 생성
+    Member createMember() {
+        MemberForm memberForm = createMemberForm();
+        return new Member(memberForm);
+
     }
 
     @Test
@@ -44,7 +49,6 @@ class MemberControllerTest {
 
         //Given
         MemberForm memberForm = createMemberForm();
-        Member member = new Member(memberForm);
 
         //When, Then
         mockMvc.perform(post("/profile/add")
@@ -61,12 +65,10 @@ class MemberControllerTest {
     @Test
     @DisplayName("사용자 프로필 조회 테스트")
     void findMemberTest() throws Exception {
-        //Given
-        MemberForm memberForm = createMemberForm();
-        Member member = new Member(memberForm);
-        member.setId(1L);
 
-        // Mock 동작 정의
+        //Given
+        Member member = createMember();
+        member.setId(1L);
         Mockito.when(memberRepository.findById(1L)).thenReturn(member);
 
         //When, Then
@@ -79,9 +81,9 @@ class MemberControllerTest {
     @Test
     @DisplayName("사용자 프로필 수정 테스트")
     void editMemberTest() throws Exception {
-        // Given: Mock 데이터 준비
-        MemberForm memberForm = createMemberForm();
-        Member member = new Member(memberForm);
+
+        // Given
+        Member member = createMember();
         member.setId(1L);
 
         MemberEditForm editForm = new MemberEditForm();
@@ -90,8 +92,6 @@ class MemberControllerTest {
         editForm.setNative_lang("English");
         editForm.setIntroduction("Updated introduction");
 
-
-        // Mock 설정
         Mockito.when(memberRepository.findById(1L)).thenReturn(member);
 
         // When, Then

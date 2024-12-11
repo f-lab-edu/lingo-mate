@@ -26,12 +26,14 @@ class LoginControllerTest {
     @MockitoBean
     private MemberRepository memberRepository;
 
+    LoginForm createLoginForm() {
+        LoginForm loginForm = new LoginForm("gdrffg@naver.com", "1234");
+        return loginForm;
+    }
     @Test
     @DisplayName("로그인 성공 테스트")
     void loginSuccessTest() throws Exception {
-        LoginForm loginForm = new LoginForm();
-        loginForm.setEmail("gdrffg@naver.com");
-        loginForm.setPassword("1234");
+        LoginForm loginForm = createLoginForm();
 
         Member member = new Member();
         member.setId(1L);
@@ -51,9 +53,7 @@ class LoginControllerTest {
     @Test
     @DisplayName("로그인 실패 테스트 - 비밀번호 불일치")
     void loginFailWrongPasswordTest() throws Exception {
-        LoginForm loginForm = new LoginForm();
-        loginForm.setEmail("gdrffg@naver.com");
-        loginForm.setPassword("1234");
+        LoginForm loginForm = createLoginForm();
 
         Member member = new Member();
         member.setId(1L);
@@ -73,10 +73,7 @@ class LoginControllerTest {
     @Test
     @DisplayName("로그인 실패 테스트 - 비밀번호 불일치")
     void loginFailNoUserTest() throws Exception {
-        LoginForm loginForm = new LoginForm();
-        loginForm.setEmail("gdrffg@naver.com");
-        loginForm.setPassword("1234");
-
+        LoginForm loginForm = createLoginForm();
         Member member = new Member();
         member.setId(1L);
         member.setEmail(loginForm.getEmail());

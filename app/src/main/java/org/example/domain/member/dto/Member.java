@@ -3,6 +3,7 @@ package org.example.domain.member.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -23,7 +24,7 @@ public class Member {
 
     private static long sequence = 0L;
 
-    // 회원 가입 정보 memberForm 을 이용하여 사용자 정보 초기화
+    // 회원 가입 정보 memberForm 을 이용하여 사용자 정보 생성
     public Member(MemberForm memberForm) {
         this.id = ++sequence;
         this.email = memberForm.getEmail();
@@ -32,6 +33,7 @@ public class Member {
         this.nationality = memberForm.getNationality();
         this.native_lang = memberForm.getNative_lang();
         this.introduction = memberForm.getIntroduction();
+        this.learning = new ArrayList<>();
         this.follower = 0;
         this.following = 0;
         this.point = 50;
@@ -40,11 +42,11 @@ public class Member {
 
     // memberEditFrom 을 이용하여 사용자 정보 수정
     public Member editMember(MemberEditForm memberEditForm) {
-        setUsername(memberEditForm.getUsername());
-        setNationality(memberEditForm.getNationality());
-        setNative_lang(memberEditForm.getNative_lang());
-        setLearning(memberEditForm.getLearning());
-        setIntroduction(memberEditForm.getIntroduction());
+        this.username = memberEditForm.getUsername();
+        this.nationality = memberEditForm.getNationality();
+        this.native_lang = memberEditForm.getNative_lang();
+        this.learning = memberEditForm.getLearning();
+        this.introduction = memberEditForm.getIntroduction();
         return this;
     }
 }

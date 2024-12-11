@@ -27,14 +27,14 @@ public class MemberController {
 
     // 사용자 프로필 조회
     @GetMapping("/{user_id}")
-    public Member findMember(@PathVariable(value = "user_id") String user_id){
-        return memberRepository.findById(Long.parseLong(user_id));
+    public Member findMember(@PathVariable(value = "user_id") Long user_id){
+        return memberRepository.findById(user_id);
     }
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
-    public Member editMember(@PathVariable(value = "user_id") String user_id, @Valid @ModelAttribute MemberEditForm memberEditForm){
-        Member member = memberRepository.findById(Long.parseLong(user_id));
+    public Member editMember(@PathVariable(value = "user_id") Long user_id, @Valid @ModelAttribute MemberEditForm memberEditForm){
+        Member member = memberRepository.findById(user_id);
         return member.editMember(memberEditForm);
     }
 }
