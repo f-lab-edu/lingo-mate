@@ -1,40 +1,58 @@
 package org.example.domain.member;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.example.domain.member.dto.Member;
 import org.example.domain.member.dto.MemberEditForm;
 import org.example.domain.member.dto.MemberForm;
-import org.springframework.validation.BindingResult;
+import org.example.domain.member.entity.Member;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/profile")
 public class MemberController {
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
+
+    @Autowired
+    public MemberController(MemberService memberService) {
+        this.memberService = memberService;
+    }
 
     // 회원가입
     @PostMapping("/add")
-    public String save(@Valid @ModelAttribute MemberForm memberForm, BindingResult result){
-        if(result.hasErrors()) {
-            return "error";
-        }
-        Member member = new Member(memberForm);
-        memberRepository.save(member);
-        return "ok";
+    public ResponseEntity<Member> save(@Valid @RequestBody MemberForm memberForm) {
+        Member savedMember = memberService.save(memberForm);
+        // 회원 가입 성공 201 created
+        return ResponseEntity.created(URI.create("profile/add/" + savedMember.getId())).body(savedMember);
     }
 
     // 사용자 프로필 조회
     @GetMapping("/{user_id}")
-    public Member findMember(@PathVariable(value = "user_id") Long user_id){
-        return memberRepository.findById(user_id);
+    public ResponseEntity<Member> findMember(@PathVariable(value = "user_id") Long user_id) {
+        Member member = memberService.getMember(user_id);
+
+        // 조회 실패 404 Not Found
+        if (member == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 조회 성공 200 Ok
+        return ResponseEntity.ok().body(member);
     }
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
-    public Member editMember(@PathVariable(value = "user_id") Long user_id, @Valid @ModelAttribute MemberEditForm memberEditForm){
-        Member member = memberRepository.findById(user_id);
-        return member.editMember(memberEditForm);
+    public ResponseEntity<Member> editMember(@PathVariable(value = "user_id") Long user_id, @Valid @RequestBody MemberEditForm memberEditForm) {
+
+        Member updateMember = memberService.updateMember(user_id, memberEditForm);
+
+        // 조회 실패 404 Not Found
+        if (updateMember == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok().body(updateMember);
     }
 }
