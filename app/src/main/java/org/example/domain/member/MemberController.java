@@ -22,16 +22,16 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/add")
-    public ResponseEntity<Member> save(@Valid @RequestBody MemberForm memberForm) {
-        Member savedMember = memberService.save(memberForm);
+    public ResponseEntity<Member> memberAdd(@Valid @RequestBody MemberForm memberForm) {
+        Member savedMember = memberService.addMember(memberForm);
         // 회원 가입 성공 201 created
         return ResponseEntity.created(URI.create("profile/add/" + savedMember.getId())).body(savedMember);
     }
 
     // 사용자 프로필 조회
     @GetMapping("/{user_id}")
-    public ResponseEntity<Member> findMember(@PathVariable(value = "user_id") Long user_id) {
-        Member member = memberService.getMember(user_id);
+    public ResponseEntity<Member> memberDetails(@PathVariable(value = "user_id") Long user_id) {
+        Member member = memberService.findMember(user_id);
 
         // 조회 실패 404 Not Found
         if (member == null) {
@@ -44,9 +44,9 @@ public class MemberController {
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
-    public ResponseEntity<Member> editMember(@PathVariable(value = "user_id") Long user_id, @Valid @RequestBody MemberEditForm memberEditForm) {
+    public ResponseEntity<Member> memberModify(@PathVariable(value = "user_id") Long user_id, @Valid @RequestBody MemberEditForm memberEditForm) {
 
-        Member updateMember = memberService.updateMember(user_id, memberEditForm);
+        Member updateMember = memberService.modifyMember(user_id, memberEditForm);
 
         // 조회 실패 404 Not Found
         if (updateMember == null) {

@@ -1,7 +1,7 @@
 package org.example.domain.login;
 
-import org.example.domain.login.dto.LoginForm;
-import org.example.domain.login.dto.LoginResponse;
+import org.example.domain.login.dto.request.LoginForm;
+import org.example.domain.login.dto.response.LoginResponse;
 
 public class LoginTestFixture {
 
