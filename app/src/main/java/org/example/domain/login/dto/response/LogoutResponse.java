@@ -1,4 +1,4 @@
-package org.example.domain.login.dto;
+package org.example.domain.login.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
