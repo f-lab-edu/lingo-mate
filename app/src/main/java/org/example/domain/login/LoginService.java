@@ -30,12 +30,12 @@ public class LoginService {
         if(member != null) {
             HttpSession session = request.getSession();
             session.setAttribute(SessionConst.LOGIN_MEMBER, member);
-            return new LoginResponse(session.getId(), member.getId(), member.getUsername(), member.getEmail());
+            return new LoginResponse(session.getId(), member.getId(), member.getUsername(), member.getEmail(), "login success");
         }
 
         // 로그인 실패
         else {
-            return new LoginResponse();
+            return new LoginResponse("login fail");
         }
 
     }

@@ -5,11 +5,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class LoginResponse {
     private String sessionId;
     private Long userId;
     private String username;
     private String email;
+    private String message;
+
+    public LoginResponse(String message) {
+        this.message = message;
+    }
 }
