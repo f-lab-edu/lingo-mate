@@ -18,19 +18,19 @@ public class MemberService {
     }
 
     // 회원가입
-    public Member save(MemberForm memberForm){
+    public Member addMember(MemberForm memberForm){
         return memberRepository.save(Member.createMember(memberForm));
 
     }
 
     // 사용자 프로필 조회
-    public Member getMember(Long user_id){
+    public Member findMember(Long user_id){
         return memberRepository.findById(user_id);
     }
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
-    public Member updateMember(Long user_id, MemberEditForm memberEditForm){
+    public Member modifyMember(Long user_id, MemberEditForm memberEditForm){
         Member member = memberRepository.findById(user_id);
 
         if(member != null) {

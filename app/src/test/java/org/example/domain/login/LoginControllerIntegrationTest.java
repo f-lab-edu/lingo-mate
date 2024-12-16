@@ -1,8 +1,8 @@
 package org.example.domain.login;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.domain.login.dto.LoginForm;
-import org.example.domain.login.dto.LoginResponse;
+import org.example.domain.login.dto.request.LoginForm;
+import org.example.domain.login.dto.response.LoginResponse;
 import org.example.domain.member.entity.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
