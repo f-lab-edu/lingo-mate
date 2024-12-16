@@ -2,7 +2,6 @@ package org.example.domain.member;
 
 import org.example.domain.member.dto.MemberEditForm;
 import org.example.domain.member.dto.MemberForm;
-import org.example.domain.member.entity.Member;
 
 import java.util.List;
 

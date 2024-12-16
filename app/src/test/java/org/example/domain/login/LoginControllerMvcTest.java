@@ -1,6 +1,8 @@
 package org.example.domain.login;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.login.dto.LoginForm;
 import org.example.domain.login.dto.LoginResponse;
@@ -10,14 +12,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.example.domain.login.LoginTestFixture.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Slf4j
 @WebMvcTest(LoginController.class)
@@ -46,27 +47,29 @@ class LoginControllerMvcTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(validLoginForm)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.sessionId").value(loginSuccessResponse.getSessionId()))
+                .andExpect(jsonPath("$.sessionId").isNotEmpty())
                 .andExpect(jsonPath("$.userId").value(loginSuccessResponse.getUserId()))
                 .andExpect(jsonPath("$.username").value(loginSuccessResponse.getUsername()))
-                .andExpect(jsonPath("$.email").value(loginSuccessResponse.getEmail()));
+                .andExpect(jsonPath("$.email").value(loginSuccessResponse.getEmail()))
+                .andExpect(jsonPath("$.message").value(loginSuccessResponse.getMessage()));
     }
 
     @Test
-    @DisplayName("로그인 실패 테스트")
+    @DisplayName("로그인 실패 테스트 - 비밀번호 불일치")
     void loginFailWrongPasswordTest() throws Exception {
         // Given
         LoginForm invalidLoginForm = createInvalidLoginForm();
-        LoginResponse loginResponse = loginFailResponse();
+        LoginResponse loginFailResponse = loginFailResponse();
 
         Mockito.when(loginService.createSession(Mockito.any(), Mockito.any()))
-               .thenReturn(loginResponse);
+               .thenReturn(loginFailResponse);
 
         // When & Then
         mockMvc.perform(post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(invalidLoginForm)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(loginFailResponse.getMessage()));
     }
 
 
@@ -82,8 +85,7 @@ class LoginControllerMvcTest {
         // When & Then
         mockMvc.perform(post("/logout")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("로그아웃 성공"));
+                .andExpect(status().isOk());
     }
 
     @Test

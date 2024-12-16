@@ -29,7 +29,7 @@ public class LoginController {
 
         LoginResponse loginResponse = loginService.createSession(loginForm, request);
 
-        if(loginResponse == null) {
+        if(loginResponse.getUserId() == null) {
             return ResponseEntity.badRequest().body(loginResponse);
         }
         
