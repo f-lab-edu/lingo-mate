@@ -3,6 +3,7 @@ package org.example.domain.question;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.example.domain.member.entity.Member;
 import org.example.domain.question.dto.request.CommentEditForm;
 import org.example.domain.question.dto.request.QuestionCreateForm;
 import org.example.domain.question.dto.request.QuestionEditForm;
@@ -32,14 +33,14 @@ public class QuestionController {
     @PostMapping("/create")
     public ResponseEntity<Question> questionAdd(@Valid @RequestBody QuestionCreateForm createForm, HttpServletRequest request) {
 
-        String loggedUsername = (String)request.getSession().getAttribute(SessionConst.LOGIN_MEMBER);
-        log.info("request = {}", request.getSession().getAttribute(SessionConst.LOGIN_MEMBER));
+        Member member = (Member)request.getSession().getAttribute(SessionConst.LOGIN_MEMBER);
+        log.info("logged member = {}", member);
         // 로그인되지 않은 경우 예외 처리
-        if (loggedUsername == null) {
+        if (member == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        Question newQuestion = questionService.addQuestion(createForm, loggedUsername);
+        Question newQuestion = questionService.addQuestion(createForm, member.getUsername());
         return ResponseEntity.ok().body(newQuestion);
     }
 
