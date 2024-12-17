@@ -48,7 +48,7 @@ class MemberControllerMvcTest {
 
         //Given
         MemberForm validMemberForm = createValidMemberForm();
-        Mockito.when(memberService.save(validMemberForm)).thenReturn(createMember(validMemberForm));
+        Mockito.when(memberService.addMember(validMemberForm)).thenReturn(createMember(validMemberForm));
 
         //When, Then
         mockMvc.perform(post("/profile/add")
@@ -85,7 +85,7 @@ class MemberControllerMvcTest {
     
         //Given
         Member member = createMember(createValidMemberForm());
-        Mockito.when(memberService.getMember(1L)).thenReturn(member);
+        Mockito.when(memberService.findMember(1L)).thenReturn(member);
 
         //When, Then
         mockMvc.perform(get("/profile/{user_id}", 1L))
@@ -105,7 +105,7 @@ class MemberControllerMvcTest {
     @DisplayName("사용자 프로필 조회 테스트 - 실패")
     void findMemberTestFail() throws Exception {
         //Given
-        Mockito.when(memberService.getMember(2L)).thenReturn(null);
+        Mockito.when(memberService.findMember(2L)).thenReturn(null);
 
         //When, Then
         mockMvc.perform(get("/profile/{user_id}", 2L))
@@ -120,7 +120,7 @@ class MemberControllerMvcTest {
         Member member = createMember(createValidMemberForm());
         MemberEditForm editForm = createValidMemberEditForm();
 
-        Mockito.when(memberService.updateMember(1L, editForm)).thenReturn(member.editMember(editForm));
+        Mockito.when(memberService.modifyMember(1L, editForm)).thenReturn(member.editMember(editForm));
 
         // When, Then
         mockMvc.perform(put("/profile/{user_id}/edit", 1L)
@@ -160,7 +160,7 @@ class MemberControllerMvcTest {
     @DisplayName("사용자 프로필 수정 테스트 - 회원 조회 실패")
     void editMemberTestNotFoundFail() throws Exception {
         MemberEditForm validMemberEditForm = createValidMemberEditForm();
-        Mockito.when(memberService.getMember(2L)).thenReturn(null);
+        Mockito.when(memberService.findMember(2L)).thenReturn(null);
 
         // When, Then
         mockMvc.perform(put("/profile/{user_id}/edit", 1L)
