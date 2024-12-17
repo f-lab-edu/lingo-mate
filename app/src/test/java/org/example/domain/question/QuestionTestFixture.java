@@ -1,5 +1,6 @@
 package org.example.domain.question;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.domain.login.LoginTestFixture;
 import org.example.domain.login.dto.request.LoginForm;
 import org.example.domain.login.dto.response.LoginResponse;
@@ -8,10 +9,17 @@ import org.example.domain.member.dto.MemberEditForm;
 import org.example.domain.member.dto.MemberForm;
 import org.example.domain.member.entity.Member;
 import org.example.domain.question.dto.request.QuestionCreateForm;
+import org.example.domain.question.entity.Question;
+import org.junit.jupiter.api.TestTemplate;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
+@Slf4j
 public class QuestionTestFixture {
+
     // 회원 가입 후 로그인한 후 session 전달
     public static String joinAndLogin(TestRestTemplate restTemplate, int port) {
         // 회원 가입
@@ -53,6 +61,28 @@ public class QuestionTestFixture {
                 .content("this is content")
                 .point(50)
                 .build();
+    }
+
+    // 질문 조회, 수정, 삭제를 위한 테스팅 환경 - 회원 가입 후 로그인 한 사용자가 질문 생성
+    public static Long createQuestion(TestRestTemplate restTemplate, int port) {
+        String session = joinAndLogin(restTemplate, port);
+
+        // sessionId를 요청 헤더에 추가
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.COOKIE, session);
+
+        QuestionCreateForm validQuestionForm = createValidQuestionForm();
+        HttpEntity<QuestionCreateForm> request = new HttpEntity<>(validQuestionForm, headers);
+
+        // When
+        ResponseEntity<Question> response = restTemplate.exchange(
+                "http://localhost:" + port + "/question/create",
+                HttpMethod.POST,
+                request,
+                Question.class
+        );
+
+        return response.getBody().getId();
     }
 
 }

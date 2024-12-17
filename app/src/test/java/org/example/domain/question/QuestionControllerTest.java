@@ -1,14 +1,8 @@
 package org.example.domain.question;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.domain.login.LoginTestFixture;
-import org.example.domain.login.dto.request.LoginForm;
-import org.example.domain.member.MemberTestFixture;
-import org.example.domain.member.dto.MemberForm;
-import org.example.domain.member.entity.Member;
 import org.example.domain.question.dto.request.QuestionCreateForm;
 import org.example.domain.question.entity.Question;
-import org.example.domain.session.SessionConst;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.mock.web.MockHttpSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.example.domain.question.QuestionTestFixture.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -32,7 +24,7 @@ class QuestionControllerTest {
     private TestRestTemplate restTemplate;
 
     private String getBaseUrl() {
-        return "http://localhost:" + port + "/profile";
+        return "http://localhost:" + port + "/question";
     }
 
     @Test
@@ -52,7 +44,7 @@ class QuestionControllerTest {
 
         // When
         ResponseEntity<Question> response = restTemplate.exchange(
-                "/question/create",
+                getBaseUrl() + "/create",
                 HttpMethod.POST,
                 request,
                 Question.class
@@ -86,7 +78,7 @@ class QuestionControllerTest {
 
         // When
         ResponseEntity<Question> response = restTemplate.exchange(
-                "/question/create",
+                getBaseUrl() + "/create",
                 HttpMethod.POST,
                 request,
                 Question.class
@@ -108,7 +100,7 @@ class QuestionControllerTest {
 
         // When
         ResponseEntity<Question> response = restTemplate.exchange(
-                "/question/create",
+                getBaseUrl() + "/create",
                 HttpMethod.POST,
                 request,
                 Question.class
@@ -121,17 +113,50 @@ class QuestionControllerTest {
     }
 
 
+    @Test
+    @DisplayName("질문 조회 성공")
+    void questionDetailsSuccess() {
+
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+        Long createdQuestionId = createQuestion(restTemplate, port);
+
+        // when
+        ResponseEntity<Question> response = restTemplate.getForEntity(
+                getBaseUrl() + "/" + createdQuestionId,
+                Question.class
+        );
+
+        // then
+        Question body = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(body.getUsername()).isEqualTo("validUsername");
+        assertThat(body.getQuestion_language()).isEqualTo("en");
+        assertThat(body.getTitle()).isEqualTo("this is question");
+        assertThat(body.getContent()).isEqualTo("this is content");
+        assertThat(body.getPoint()).isEqualTo(50);
+
+    }
 
     @Test
-    void questionDetails() {
+    @DisplayName("질문 조회 실패 - 존재하지 않는 질문 조회 시도")
+    void questionDetailsFail() {
+
+        Long notExistedQuestionId = 999L;
+
+        // when
+        ResponseEntity<Question> response = restTemplate.getForEntity(
+                getBaseUrl() + "/" + notExistedQuestionId,
+                Question.class
+        );
+
+        // then
+        Question body = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
     }
 
     @Test
     void questionModify() {
-    }
-
-    @Test
-    void questionList() {
     }
 
     @Test
@@ -140,6 +165,10 @@ class QuestionControllerTest {
 
     @Test
     void questionSearch() {
+    }
+
+    @Test
+    void questionList() {
     }
 
     @Test

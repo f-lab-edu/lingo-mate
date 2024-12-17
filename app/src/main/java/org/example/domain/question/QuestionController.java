@@ -47,7 +47,11 @@ public class QuestionController {
     // 질문 조회
     @GetMapping("/{q_id}")
     public ResponseEntity<Question> questionDetails(@PathVariable(value = "q_id") Long questionId) {
+        log.info("q_id={}",questionId);
         Question question = questionService.findQuestion(questionId);
+        if(question == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
         return ResponseEntity.ok().body(question);
     }
 
