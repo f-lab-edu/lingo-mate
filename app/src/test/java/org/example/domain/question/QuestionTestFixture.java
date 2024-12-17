@@ -64,7 +64,7 @@ public class QuestionTestFixture {
     }
 
     // 질문 조회, 수정, 삭제를 위한 테스팅 환경 - 회원 가입 후 로그인 한 사용자가 질문 생성
-    public static Long createQuestion(TestRestTemplate restTemplate, int port) {
+    public static Question createQuestion(TestRestTemplate restTemplate, int port) {
         String session = joinAndLogin(restTemplate, port);
 
         // sessionId를 요청 헤더에 추가
@@ -82,7 +82,7 @@ public class QuestionTestFixture {
                 Question.class
         );
 
-        return response.getBody().getId();
+        return response.getBody();
     }
 
 }

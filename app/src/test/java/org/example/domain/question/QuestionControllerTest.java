@@ -118,11 +118,11 @@ class QuestionControllerTest {
     void questionDetailsSuccess() {
 
         // given 회원 가입 후 로그인 한 사용자가 질문 생성
-        Long createdQuestionId = createQuestion(restTemplate, port);
+        Question question = createQuestion(restTemplate, port);
 
         // when
         ResponseEntity<Question> response = restTemplate.getForEntity(
-                getBaseUrl() + "/" + createdQuestionId,
+                getBaseUrl() + "/" + question.getId(),
                 Question.class
         );
 
@@ -156,7 +156,42 @@ class QuestionControllerTest {
     }
 
     @Test
-    void questionModify() {
+    @DisplayName("질문 수정 성공")
+    void questionModifySuccess() {
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+        Question question1 = createQuestion(restTemplate, port);
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+        Question question = createQuestion(restTemplate, port);
+
+    }
+
+    @Test
+    @DisplayName("질문 수정 실패 - 질문을 생성하지 않는 다른 사람이 질문 수정 시도")
+    void questionModifyFailUnauthorized() {
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+        Question question = createQuestion(restTemplate, port);
+
+    }
+
+    @Test
+    @DisplayName("질문 수정 실패 - 질문 수정 검증 조건에 미충족")
+    void questionModifyFailInvalid() {
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+        Question question = createQuestion(restTemplate, port);
+
+    }
+    @Test
+    @DisplayName("질문 수정 실패 - 존재하지 않는 질문을 수정 시도")
+    void questionModifyFailNotExisted() {
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+
+        // given 회원 가입 후 로그인 한 사용자가 질문 생성
+        Question question = createQuestion(restTemplate, port);
+
     }
 
     @Test
