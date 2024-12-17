@@ -2,7 +2,7 @@ package org.example.domain.member;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.domain.member.dto.Member;
+import org.example.domain.member.entity.Member;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
