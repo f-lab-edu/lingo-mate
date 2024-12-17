@@ -1,17 +1,27 @@
-package org.example.domain.question.dto;
+package org.example.domain.question.entity;
 
-import lombok.Data;
+import lombok.*;
+import org.example.domain.member.MemberRepository;
+import org.example.domain.question.dto.request.CommentEditForm;
+import org.example.domain.question.dto.request.QuestionCreateForm;
+import org.example.domain.question.dto.request.QuestionEditForm;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Question {
-    private static Long sequence = 0L;
+
+    private static final AtomicLong sequence = new AtomicLong();
+
     private Long id;
-    private String author;
+    private String username;
     private String question_language;
     private String title;
     private String content;
@@ -20,17 +30,26 @@ public class Question {
     private Integer point;
     private List<Comment> comments;
 
-    public Question(QuestionCreateForm questionCreateForm) {
-        this.id = ++sequence;
-        this.author = questionCreateForm.getAuthor();
-        this.question_language = questionCreateForm.getQuestion_language();
-        this.title = questionCreateForm.getTitle();
-        this.content = questionCreateForm.getContent();
-        this.point = questionCreateForm.getPoint();
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-        this.comments = new ArrayList<>();
+    // ID 초기화 메서드
+    public static void resetSequence() {
+        sequence.set(0);
     }
+
+    public static Question createQuestion(QuestionCreateForm questionCreateForm, String loggedUsername) {
+
+        return Question.builder()
+                .id(sequence.incrementAndGet()) // ID 자동 증가
+                .username(loggedUsername)
+                .question_language(questionCreateForm.getQuestion_language())
+                .title(questionCreateForm.getTitle())
+                .content(questionCreateForm.getContent())
+                .point(questionCreateForm.getPoint())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .comments(new ArrayList<>()) // 빈 댓글 리스트 초기화
+                .build();
+    }
+
 
     public Question editQuestion(QuestionEditForm updatedQuestion) {
         if (updatedQuestion.getQuestion_language() != null) {
@@ -42,14 +61,12 @@ public class Question {
         if (updatedQuestion.getContent() != null) {
             this.content = updatedQuestion.getContent();
         }
-        if (updatedQuestion.getUpdatedAt() != null) {
-            this.updatedAt = updatedQuestion.getUpdatedAt();
-        } else {
-            this.updatedAt = LocalDateTime.now(); // 수정 시간이 null이면 현재 시간으로 설정
-        }
         if (updatedQuestion.getPoint() != null) {
             this.point = updatedQuestion.getPoint();
         }
+
+        this.updatedAt = LocalDateTime.now();
+
         return this;
     }
 

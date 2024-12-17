@@ -1,10 +1,16 @@
-package org.example.domain.question.dto;
+package org.example.domain.question.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.example.domain.question.dto.request.CommentEditForm;
 
 import java.time.LocalDateTime;
 
 @Data
+@AllArgsConstructor
+@Builder
 public class Comment {
     private static Long sequence = 0L;
 
