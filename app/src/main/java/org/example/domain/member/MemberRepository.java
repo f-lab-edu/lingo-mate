@@ -13,6 +13,7 @@ public class MemberRepository {
     private static Map<Long, Member> store = new HashMap<>();
 
     public Member save(Member member) {
+        log.info("save: member={}", member);
         store.put(member.getId(), member);
         return member;
     }
