@@ -26,26 +26,14 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request) {
-
         LoginResponse loginResponse = loginService.createSession(loginForm, request);
-
-        if(loginResponse.getUserId() == null) {
-            return ResponseEntity.badRequest().body(loginResponse);
-        }
-        
         return ResponseEntity.ok().body(loginResponse);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<LogoutResponse> logout(HttpServletRequest request) {
-
-        boolean isInvalidated = loginService.invalidateSession(request);
-
-        if(isInvalidated == true) {
-            return ResponseEntity.ok().body(new LogoutResponse("로그아웃 성공"));
-        } else {
-            return ResponseEntity.badRequest().body(new LogoutResponse("로그아웃 실패"));
-        }
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        loginService.invalidateSession(request);
+        return ResponseEntity.status(204).build();
     }
 
 }
