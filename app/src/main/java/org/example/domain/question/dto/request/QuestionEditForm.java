@@ -1,11 +1,13 @@
 package org.example.domain.question.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class QuestionEditForm {
     @Pattern(
             regexp = "^(ko|en|ja|cn|fr|ar|es|ru)$",
