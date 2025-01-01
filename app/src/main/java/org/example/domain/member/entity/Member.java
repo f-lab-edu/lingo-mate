@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Data
 @Builder
-@AllArgsConstructor
 public class Member {
 
     private static final AtomicLong sequence = new AtomicLong();

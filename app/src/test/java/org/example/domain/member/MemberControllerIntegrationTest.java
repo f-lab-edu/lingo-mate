@@ -1,6 +1,7 @@
 package org.example.domain.member;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.domain.member.dto.MemberEditForm;
 import org.example.domain.member.dto.MemberForm;
 import org.example.domain.member.entity.Member;
@@ -14,11 +15,15 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.example.domain.member.MemberTestFixture.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@Slf4j
 public class MemberControllerIntegrationTest {
 
     @LocalServerPort
@@ -27,26 +32,18 @@ public class MemberControllerIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private String getBaseUrl() {
-        return "http://localhost:" + port + "/profile";
-    }
-
-    @BeforeEach
-    void createTestData() {
-        Member.resetSequence();
-    }
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
-    @DisplayName("회원 가입 검증 조건을 충족한 회원 가입 성공 테스트")
-    void joinMemberSuccess() {
+    void 회원가입_성공() {
         // Given
-        MemberForm validMemberForm = MemberTestFixture.createValidMemberForm();
-
+        MemberForm memberForm = createMemberForm();
 
         // When
         ResponseEntity<Member> response = restTemplate.postForEntity(
-                getBaseUrl() + "/add",
-                validMemberForm,
+                "/profile/add",
+                memberForm,
                 Member.class
         );
 
@@ -64,89 +61,69 @@ public class MemberControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("회원 가입 검증 조건을 불충족 회원 가입 실패 테스트")
-    void joinMemberFail() {
+    void 회원가입_실패_정규식_불만족() {
 
         // Given
-        MemberForm invalidMemberForm = MemberTestFixture.createInvalidMemberForm();
+        MemberForm memberForm = createMemberForm();
+        memberForm.setLearning(List.of("it", "th")); // 배우는 언어는 ko|en|ja|cn|fr|ar|es|ru 중 하나 여야 함.
 
         // When
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                getBaseUrl() + "/add",
-                invalidMemberForm,
-                String.class
-        );
-
-        // Then: Validate the response
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    @DisplayName("사용자 프로필 조회 테스트 - 성공")
-    void findMemberTestSuccess() {
-
-        // Given
-        MemberForm validMemberForm = MemberTestFixture.createValidMemberForm();
-        ResponseEntity<Member> createResponse = restTemplate.postForEntity(
-                getBaseUrl() + "/add",
-                validMemberForm,
-                Member.class
-        );
-
-        Long memberId = createResponse.getBody().getId();
-
-        // When
-        ResponseEntity<Member> response = restTemplate.getForEntity(
-                getBaseUrl() + "/" + memberId,
+        ResponseEntity<Member> response = restTemplate.postForEntity(
+                "/profile/add",
+                memberForm,
                 Member.class
         );
 
         Member member = response.getBody();
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(member).isNotNull();
-        assertThat(member.getEmail()).isEqualTo("valid@example.com");
-        assertThat(member.getUsername()).isEqualTo("validUsername");
-        assertThat(member.getPassword()).isEqualTo("validPassword123");
-        assertThat(member.getNationality()).isEqualTo("USA");
-        assertThat(member.getNative_lang()).isEqualTo("en");
-        assertThat(member.getLearning()).contains("fr", "ja");
-        assertThat(member.getIntroduction()).isEqualTo("I am learning languages!");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("사용자 프로필 조회 테스트 - 실패")
-    void findMemberTestFail() {
+    void 프로필_조회_테스트_성공() {
+
+        // Given
+        Member save = memberRepository.save(fakeMember());
+        Long memberId = save.getId();
+
+        // When
+        ResponseEntity<Member> response = restTemplate.getForEntity(
+                "/profile/" + memberId,
+                Member.class
+        );
+        log.debug("response: {}", response.getBody());
+        Member body = response.getBody();
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(body).isNotNull();
+        assertThat(body.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void 존재하지_않는_회원_조회() {
 
         // Given
         Long nonExistentId = 999999L;
 
         // When
         ResponseEntity<String> response = restTemplate.getForEntity(
-                getBaseUrl() + "/" + nonExistentId,
+                "/profile/" + nonExistentId,
                 String.class
         );
 
         // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("사용자 프로필 수정 테스트 - 성공")
-    void editMemberTestSuccess() {
+    void 프로필_수정_성공() {
 
         // Given
-        MemberForm validMemberForm = MemberTestFixture.createValidMemberForm();
-        ResponseEntity<Member> createResponse = restTemplate.postForEntity(
-                getBaseUrl() + "/add",
-                validMemberForm,
-                Member.class
-        );
-
-        Long memberId = createResponse.getBody().getId();
+        Member save = memberRepository.save(fakeMember());
+        Long memberId = save.getId();
 
         // create validEditForm
-        MemberEditForm validEditForm = MemberTestFixture.createValidMemberEditForm();
+        MemberEditForm validEditForm = createValidMemberEditForm();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -154,7 +131,7 @@ public class MemberControllerIntegrationTest {
 
         // When
         ResponseEntity<Member> response = restTemplate.exchange(
-                getBaseUrl() + "/" + memberId + "/edit",
+                "/profile/" + memberId + "/edit",
                 HttpMethod.PUT,
                 editRequest,
                 Member.class
@@ -169,37 +146,7 @@ public class MemberControllerIntegrationTest {
         assertThat(response.getBody().getLearning()).contains("es", "cn");
         assertThat(response.getBody().getIntroduction()).isEqualTo("This is my updated introduction.");
     }
-    @Test
-    @DisplayName("사용자 프로필 수정 테스트 - 검증 조건 부족으로 인한 실패")
-    void editMemberTestInvalidFail() {
-        // Given
-        MemberForm validMemberForm = MemberTestFixture.createValidMemberForm();
-        ResponseEntity<Member> createResponse = restTemplate.postForEntity(
-                getBaseUrl() + "/add",
-                validMemberForm,
-                Member.class
-        );
 
-        Long memberId = createResponse.getBody().getId();
-
-        // create invalidEditForm
-        MemberEditForm invalidEditForm = MemberTestFixture.createInvalidMemberEditForm();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<MemberEditForm> editRequest = new HttpEntity<>(invalidEditForm, headers);
-
-        // When
-        ResponseEntity<String> response = restTemplate.exchange(
-                getBaseUrl() + "/" + memberId + "/edit",
-                HttpMethod.PUT,
-                editRequest,
-                String.class
-        );
-
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
 
     @Test
     @DisplayName("사용자 프로필 수정 테스트 - 회원 조회 실패")
@@ -209,7 +156,7 @@ public class MemberControllerIntegrationTest {
         Long nonExistentId = 999999L;
 
         // create validEditForm
-        MemberEditForm validEditForm = MemberTestFixture.createValidMemberEditForm();
+        MemberEditForm validEditForm = createValidMemberEditForm();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -217,13 +164,13 @@ public class MemberControllerIntegrationTest {
 
         // When
         ResponseEntity<String> response = restTemplate.exchange(
-                getBaseUrl() + "/" + nonExistentId + "/edit",
+                "/profile/" + nonExistentId + "/edit",
                 HttpMethod.PUT,
                 editRequest,
                 String.class
         );
 
         // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 }

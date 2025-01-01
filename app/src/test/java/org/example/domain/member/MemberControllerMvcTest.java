@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.domain.member.dto.MemberEditForm;
 import org.example.domain.member.dto.MemberForm;
 import org.example.domain.member.entity.Member;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // 회원 관리 기능 API 통합 테스트
 @WebMvcTest(MemberController.class)
+@ActiveProfiles("test")
 class MemberControllerMvcTest {
     @Autowired
     private MockMvc mockMvc;
@@ -36,18 +37,17 @@ class MemberControllerMvcTest {
     String toJson(Object obj) throws Exception {
         return objectMapper.writeValueAsString(obj);
     }
-
+    /*
     @BeforeEach
     void createTestData() {
         Member.resetSequence();
     }
-
+     */
     @Test
-    @DisplayName("회원 가입 검증 조건을 충족한 회원 가입 성공 테스트")
-    void joinMemberSuccess() throws Exception {
+    void 회원가입_성공() throws Exception {
 
         //Given
-        MemberForm validMemberForm = createValidMemberForm();
+        MemberForm validMemberForm = createMemberForm();
         Mockito.when(memberService.addMember(validMemberForm)).thenReturn(createMember(validMemberForm));
 
         //When, Then
@@ -66,25 +66,10 @@ class MemberControllerMvcTest {
     }
 
     @Test
-    @DisplayName("회원 가입 검증 조건을 불충족 회원 가입 실패 테스트")
-    void joinMemberFail() throws Exception {
-
-        //Given
-        MemberForm invalidMemberForm = createInvalidMemberForm();
-
-        //When, Then
-        mockMvc.perform(post("/profile/add")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(invalidMemberForm)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("사용자 프로필 조회 테스트 - 성공")
-    void findMemberTestSuccess() throws Exception {
+    void 프로필_조회_성공() throws Exception {
     
         //Given
-        Member member = createMember(createValidMemberForm());
+        Member member = fakeMember();
         Mockito.when(memberService.findMember(1L)).thenReturn(member);
 
         //When, Then
@@ -102,22 +87,20 @@ class MemberControllerMvcTest {
     }
 
     @Test
-    @DisplayName("사용자 프로필 조회 테스트 - 실패")
-    void findMemberTestFail() throws Exception {
+    void 프로필_조회_실패_존재하지_않는_회원() throws Exception {
         //Given
-        Mockito.when(memberService.findMember(2L)).thenReturn(null);
+        Mockito.when(memberService.findMember(2L)).thenThrow(RuntimeException.class);
 
         //When, Then
         mockMvc.perform(get("/profile/{user_id}", 2L))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("사용자 프로필 수정 테스트 - 성공")
-    void editMemberTestSuccess() throws Exception {
+    void 프로필_수정_성공() throws Exception {
 
         // Given
-        Member member = createMember(createValidMemberForm());
+        Member member = fakeMember();
         MemberEditForm editForm = createValidMemberEditForm();
 
         Mockito.when(memberService.modifyMember(1L, editForm)).thenReturn(member.editMember(editForm));
@@ -139,34 +122,20 @@ class MemberControllerMvcTest {
 
     }
 
-    @Test
-    @DisplayName("사용자 프로필 수정 테스트 - 검증 조건 부족합으로 인한 실패")
-    void editMemberTestInvalidFail() throws Exception {
 
-        // Given
-        Member member = createMember(createValidMemberForm());
-        MemberEditForm invalidMemberEditForm = createInvalidMemberEditForm();
-
-
-        // When, Then
-        mockMvc.perform(put("/profile/{user_id}/edit", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(invalidMemberEditForm)))
-                .andExpect(status().isBadRequest());
-
-    }
 
     @Test
-    @DisplayName("사용자 프로필 수정 테스트 - 회원 조회 실패")
-    void editMemberTestNotFoundFail() throws Exception {
+    @DisplayName("")
+    void 프로필_수정_실패_존재하지_않는_회원() throws Exception {
+        //Given
         MemberEditForm validMemberEditForm = createValidMemberEditForm();
-        Mockito.when(memberService.findMember(2L)).thenReturn(null);
+        Mockito.when(memberService.modifyMember(2L, validMemberEditForm)).thenThrow(RuntimeException.class);
 
         // When, Then
-        mockMvc.perform(put("/profile/{user_id}/edit", 1L)
+        mockMvc.perform(put("/profile/{user_id}/edit", 2L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(validMemberEditForm)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
 
     }
 

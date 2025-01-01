@@ -11,6 +11,8 @@ import org.example.domain.session.SessionConst;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 public class LoginService {
@@ -21,34 +23,41 @@ public class LoginService {
     public LoginService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
+
     public LoginResponse createSession(LoginForm loginForm, HttpServletRequest request) {
 
-        Member member = memberRepository.findByEmail(loginForm.getEmail())
-                .filter(m -> m.getPassword().equals(loginForm.getPassword()))
-                .orElse(null);
+        Optional<Member> optionalMember = memberRepository.findByEmailAndPassword(loginForm.getEmail(), loginForm.getPassword());
 
-        if(member != null) {
+        if (optionalMember.isPresent()) {
+            Member member = optionalMember.get();
             HttpSession session = request.getSession();
             session.setAttribute(SessionConst.LOGIN_MEMBER, member);
-            return new LoginResponse(session.getId(), member.getId(), member.getUsername(), member.getEmail(), "login success");
+
+            return LoginResponse.builder()
+                    .sessionId(session.getId())
+                    .userId(member.getId())
+                    .username(member.getUsername())
+                    .email(member.getEmail())
+                    .message("login success")
+                    .build();
         }
 
-        // 로그인 실패
+        // 로그인 실패 "login fail"
         else {
-            return new LoginResponse("login fail");
+            throw new RuntimeException("로그인 실패");
         }
 
     }
 
-    public boolean invalidateSession(HttpServletRequest request) {
+    public void invalidateSession(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        log.info("session= {}", session);
-        if(session != null) {
-            session.invalidate();
-            return true;
-        } else {
-            return false;
+        log.debug("session= {}", session);
+
+        if (session == null) {
+            throw new RuntimeException("세션이 존재하지 않음");
         }
 
+        log.debug("로그아웃 시도");
+        session.invalidate();
     }
 }
