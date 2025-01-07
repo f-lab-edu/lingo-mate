@@ -37,5 +37,5 @@ out/
 .vscode/
 
 ## ADD
-./mysql_data/
+mysql_data
 compose.yml
