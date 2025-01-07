@@ -1,29 +1,31 @@
 package org.example.domain.login;
 
+import org.example.domain.error.ErrorMsg;
 import org.example.domain.login.dto.request.LoginForm;
 import org.example.domain.login.dto.response.LoginResponse;
 
 public class LoginTestFixture {
 
+    // 로그인 성공 입력 폼
     public static LoginForm createValidLoginForm() {
-        return LoginForm.builder()
-                .email("valid@example.com")  // 유효한 이메일
-                .password("validPassword123")  // 비밀번호
-                .build();
+        return new LoginForm("valid@example.com", "validPassword123");
     }
 
-    public static LoginResponse loginSuccessResponse() {
-        return new LoginResponse("session_id",1L, "validUsername", "valid@example.com","login success");
-    }
-
+    // 로그인 실패 입력 폼
     public static LoginForm createInvalidLoginForm() {
-        return LoginForm.builder()
-                .email("valid@example.com")  // 잘못된 이메일 형식
-                .password("worng-password")  // 비어 있는 비밀번호
+        return new LoginForm("valid@example.com", "worng-password");
+    }
+
+    // 로그인 성공 응답
+    public static LoginResponse loginSuccessResponse() {
+        return LoginResponse.builder()
+                .sessionId("session_id")
+                .userId(1L)
+                .username("validUsername")
+                .email("valid@example.com")
+                .message("login success")
                 .build();
     }
 
-    public static LoginResponse loginFailResponse() {
-        return new LoginResponse("login fail");
-    }
+
 }

@@ -9,7 +9,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-@Builder
 public class LoginForm {
 
     @NotBlank(message = "이메일은 반드시 입력해야 합니다.")

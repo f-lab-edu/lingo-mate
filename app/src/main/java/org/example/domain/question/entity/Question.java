@@ -1,8 +1,7 @@
 package org.example.domain.question.entity;
 
 import lombok.*;
-import org.example.domain.member.MemberRepository;
-import org.example.domain.question.dto.request.CommentEditForm;
+import org.example.domain.question.dto.request.CommentForm;
 import org.example.domain.question.dto.request.QuestionCreateForm;
 import org.example.domain.question.dto.request.QuestionEditForm;
 
@@ -13,8 +12,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class Question {
 
@@ -76,11 +73,12 @@ public class Question {
     }
 
     // 질문 댓글 수정
-    public void editComment(CommentEditForm commentEditForm, Long comment_id) {
+    public void editComment(CommentForm commentEditForm, Long comment_id) {
         Optional<Comment> comment = comments.stream().filter(c -> c.getId().equals(comment_id)).findFirst();
         Comment updatedComment = comment.get().editComment(commentEditForm);
         comments.set(comments.indexOf(comment.get()), updatedComment);
     }
+
 
     // 질문 삭제
     public Comment deleteComment(Long comment_id){

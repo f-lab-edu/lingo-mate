@@ -25,18 +25,27 @@ public class MemberService {
 
     // 사용자 프로필 조회
     public Member findMember(Long user_id){
-        return memberRepository.findById(user_id);
+
+        Member member = memberRepository.findById(user_id);
+
+        // 사용자 조회 실패
+        if(member == null) {
+            throw new RuntimeException("존재하지 않는 사용자입니다.");
+        }
+
+        return member;
     }
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
     public Member modifyMember(Long user_id, MemberEditForm memberEditForm){
+
         Member member = memberRepository.findById(user_id);
 
-        if(member != null) {
-            return member.editMember(memberEditForm);
-        } else {
-            return null;
+        if(member == null) {
+            throw new RuntimeException("존재하지 않는 사용자입니다.");
         }
+
+        return member.editMember(memberEditForm);
     }
 }

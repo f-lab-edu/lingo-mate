@@ -1,6 +1,7 @@
 package org.example.domain.login;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.domain.error.ErrorMsg;
 import org.example.domain.login.dto.request.LoginForm;
 import org.example.domain.login.dto.response.LoginResponse;
 import org.example.domain.member.entity.Member;
@@ -18,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.example.domain.login.LoginTestFixture.*;
-import static org.example.domain.member.MemberTestFixture.createValidMemberForm;
+import static org.example.domain.member.MemberTestFixture.createMemberForm;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -31,23 +32,18 @@ public class LoginControllerIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private String getBaseUrl() {
-        return "http://localhost:" + port;
-    }
-
-
     // 회원 가입
     public ResponseEntity<Member> join() {
         return restTemplate.postForEntity(
-                getBaseUrl() + "/profile/add",
-                createValidMemberForm(),
+                "/profile/add",
+                createMemberForm(),
                 Member.class);
     }
 
     // 정상 로그인
     public ResponseEntity<LoginResponse> login() {
         return restTemplate.postForEntity(
-                getBaseUrl() + "/login",
+                "/login",
                 createValidLoginForm(),
                 LoginResponse.class);
     }
@@ -62,7 +58,7 @@ public class LoginControllerIntegrationTest {
         LoginResponse loginSuccessResponse = loginSuccessResponse(); // 회원 가입한 정보로 로그인 했을 때 기대되는 응답
 
         //when
-        ResponseEntity<LoginResponse> response = restTemplate.postForEntity(getBaseUrl() + "/login", validLoginForm, LoginResponse.class);
+        ResponseEntity<LoginResponse> response = restTemplate.postForEntity("/login", validLoginForm, LoginResponse.class);
 
         //then
         LoginResponse body = response.getBody();
@@ -84,16 +80,14 @@ public class LoginControllerIntegrationTest {
         //given
         ResponseEntity<Member> joinResponse = join(); // 회원 가입
         LoginForm invalidLoginForm = createInvalidLoginForm();// 비밀번호가 다름
-        LoginResponse loginFailResponse = loginFailResponse();// 로그인 실패시 기대되는 응답
 
         //when
-        ResponseEntity<LoginResponse> response = restTemplate.postForEntity(getBaseUrl() + "/login", invalidLoginForm, LoginResponse.class);
-        log.info("response = {}",response);
+        ResponseEntity<ErrorMsg> response = restTemplate.postForEntity("/login", invalidLoginForm, ErrorMsg.class);
 
         //then
-        LoginResponse body = response.getBody();
+        ErrorMsg body = response.getBody();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(body.getMessage()).isEqualTo(loginFailResponse.getMessage());
+        assertThat(body.getMsg()).isEqualTo("로그인 실패");
     }
 
     @Test
@@ -102,22 +96,23 @@ public class LoginControllerIntegrationTest {
         // Given: 회원가입 및 로그인
         join();
         String sessionId = login().getBody().getSessionId(); // 로그인 후 세션 ID 확보
+        log.info(sessionId);
 
         // 헤더에 세션 ID 추가
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", "JSESSIONID=" + sessionId);
         HttpEntity<Void> logoutRequest = new HttpEntity<>(headers);
 
+
         // When: 로그아웃 요청
-        ResponseEntity<String> logoutResponse = restTemplate.postForEntity(
-                getBaseUrl() + "/logout",
+        ResponseEntity<Void> logoutResponse = restTemplate.postForEntity(
+                "/logout",
                 logoutRequest,
-                String.class
+                Void.class
         );
 
         // Then: 로그아웃 성공 확인
-        assertThat(logoutResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(logoutResponse.getBody()).contains("로그아웃 성공");
+        assertThat(logoutResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 
     @Test
@@ -131,14 +126,14 @@ public class LoginControllerIntegrationTest {
         HttpEntity<Void> logoutRequest = new HttpEntity<>(headers);
 
         // When: 로그아웃 요청
-        ResponseEntity<String> logoutResponse = restTemplate.postForEntity(
-                getBaseUrl() + "/logout",
+        ResponseEntity<ErrorMsg> response = restTemplate.postForEntity(
+                "/logout",
                 logoutRequest,
-                String.class
+                ErrorMsg.class
         );
 
         // Then: 로그아웃 실패 확인
-        assertThat(logoutResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(logoutResponse.getBody()).contains("로그아웃 실패");
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().getMsg()).contains("세션이 존재하지 않음");
     }
 }

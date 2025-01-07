@@ -56,17 +56,15 @@ class LoginControllerMvcTest {
     void loginFailWrongPasswordTest() throws Exception {
         // Given
         LoginForm invalidLoginForm = createInvalidLoginForm();
-        LoginResponse loginFailResponse = loginFailResponse();
 
         Mockito.when(loginService.createSession(Mockito.any(), Mockito.any()))
-               .thenReturn(loginFailResponse);
+                .thenThrow(RuntimeException.class);
 
         // When & Then
         mockMvc.perform(post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJson(invalidLoginForm)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(loginFailResponse.getMessage()));
+                .andExpect(status().isBadRequest());
     }
 
 
@@ -76,27 +74,26 @@ class LoginControllerMvcTest {
     void logoutTest() throws Exception {
 
         // Given
-        Mockito.when(loginService.invalidateSession(Mockito.any()))
-               .thenReturn(true);
+        Mockito.doNothing().when(loginService).invalidateSession(Mockito.any());
 
         // When & Then
         mockMvc.perform(post("/logout")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("로그아웃 실패 테스트")
     void logoutFailTest() throws Exception {
         // Given
-        Mockito.when(loginService.invalidateSession(Mockito.any()))
-                .thenReturn(false);
+        Mockito.doThrow(new RuntimeException("세션이 존재하지 않음"))
+                .when(loginService).invalidateSession(Mockito.any());
 
         // When & Then
         mockMvc.perform(post("/logout")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("로그아웃 실패"));
+                .andExpect(jsonPath("$.msg").value("세션이 존재하지 않음"));
 
     }
 }
