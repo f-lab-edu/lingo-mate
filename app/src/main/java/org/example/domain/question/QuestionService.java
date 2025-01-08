@@ -5,16 +5,15 @@ import org.example.domain.member.entity.Member;
 import org.example.domain.question.dto.request.CommentForm;
 import org.example.domain.question.dto.request.QuestionCreateForm;
 import org.example.domain.question.dto.request.QuestionEditForm;
-import org.example.domain.question.entity.Comment;
+import org.example.domain.comment.Comment;
 import org.example.domain.question.entity.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.example.domain.question.entity.Comment.*;
+import static org.example.domain.comment.Comment.*;
 
 @Slf4j
 @Service

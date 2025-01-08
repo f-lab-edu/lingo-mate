@@ -9,12 +9,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @Profile("!test")
 public class WebMvcConfig implements WebMvcConfigurer {
-
+    /*
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginCheckInterceptor())
                 .order(1)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/profile/add", "/login", "/logout");
+                .excludePathPatterns(
+                        "/profile/add",
+                        "/login", "/logout");
     }
+
+     */
 }

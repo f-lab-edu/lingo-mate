@@ -1,4 +1,4 @@
-package org.example.domain.member.dto;
+package org.example.domain.member.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class MemberForm {
+public class MemberJoinForm {
 
     @NotBlank(message = "이메일은 반드시 입력해야 합니다.")
     @Email(message = "유효한 이메일 형식이 아닙니다.")
