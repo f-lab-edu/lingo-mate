@@ -1,43 +1,48 @@
 package org.example.domain.member;
 
 import jakarta.validation.Valid;
-import org.example.domain.member.dto.MemberEditForm;
-import org.example.domain.member.dto.MemberForm;
+import lombok.RequiredArgsConstructor;
+import org.example.domain.member.dto.request.MemberEditForm;
+import org.example.domain.member.dto.request.MemberJoinForm;
+import org.example.domain.member.dto.response.MemberDTO;
 import org.example.domain.member.entity.Member;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-
 @RestController
 @RequestMapping("/profile")
+@RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
 
-    @Autowired
-    public MemberController(MemberService memberService) {
-        this.memberService = memberService;
-    }
-
-    // 회원가입
+    x
     @PostMapping("/add")
-    public ResponseEntity<Member> memberAdd(@Valid @RequestBody MemberForm memberForm) {
+    public ResponseEntity<MemberDTO> memberAdd(@Valid @RequestBody MemberJoinForm memberForm) {
         Member savedMember = memberService.addMember(memberForm);
-        return ResponseEntity.status(201).body(savedMember);
+        MemberDTO memberDTO = MemberDTO.createMemberDTO(savedMember);
+        return ResponseEntity.status(201).body(memberDTO);
     }
 
     // 사용자 프로필 조회
     @GetMapping("/{user_id}")
-    public ResponseEntity<Member> memberDetails(@PathVariable(value = "user_id") Long user_id) {
-        Member member = memberService.findMember(user_id);
-        return ResponseEntity.ok().body(member);
+    public ResponseEntity<MemberDTO> memberDetails(@PathVariable(value = "user_id") Long userId) {
+        Member member = memberService.findMember(userId);
+        MemberDTO memberDTO = MemberDTO.createMemberDTO(member);
+        return ResponseEntity.ok().body(memberDTO);
     }
 
+    // 사용자 프로필 수정 폼에 초기 데이터 제공
+    @GetMapping("/{user_id}/edit")
+    public ResponseEntity<MemberDTO> memberModify(@PathVariable(value = "user_id") Long userId) {
+        Member member = memberService.findMember(userId);
+        MemberDTO memberDTO = MemberDTO.createMemberDTO(member);
+        return ResponseEntity.ok().body(memberDTO);
+    }
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
-    public ResponseEntity<Member> memberModify(@PathVariable(value = "user_id") Long user_id, @Valid @RequestBody MemberEditForm memberEditForm) {
+    public ResponseEntity<MemberDTO> memberModify(@PathVariable(value = "user_id") Long user_id, @Valid @RequestBody MemberEditForm memberEditForm) {
         Member updateMember = memberService.modifyMember(user_id, memberEditForm);
-        return ResponseEntity.ok().body(updateMember);
+        MemberDTO memberDTO = MemberDTO.createMemberDTO(updateMember);
+        return ResponseEntity.ok().body(memberDTO);
     }
 }

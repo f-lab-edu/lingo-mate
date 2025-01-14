@@ -1,6 +1,8 @@
 package org.example.domain.member;
 
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.member.entity.Member;
 import org.springframework.stereotype.Repository;
@@ -11,23 +13,27 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Repository
 public class MemberRepository {
-    private ConcurrentHashMap<Long, Member> store = new ConcurrentHashMap<>();
+
+    @PersistenceContext
+    private EntityManager em;
 
     public Member save(Member member) {
-        log.debug("save: memberId={}", member.getId());
-        store.put(member.getId(), member);
+        em.persist(member);
         return member;
     }
 
     public Member findById(Long id) {
-        return store.get(id);
+        return em.find(Member.class, id);
     }
 
     public List<Member> findAll() {
-        return new ArrayList<>(store.values());
+        List<Member> members = em.createQuery("select m from Member m", Member.class).getResultList();
+        return members;
     }
     public Optional<Member> findByEmail(String email) {
-        return findAll().stream().filter(m -> m.getEmail().equals(email)).findFirst();
+        Member member = em.createQuery("select m from Member m where m.email = :email", Member.class)
+                .setParameter("email", email).getSingleResult();
+        return Optional.ofNullable(member);
     }
 
     public Optional<Member> findByEmailAndPassword(String email, String password) {
@@ -40,9 +46,5 @@ public class MemberRepository {
         }
 
         return Optional.empty();
-    }
-
-    public void clearStore() {
-        store.clear();
     }
 }

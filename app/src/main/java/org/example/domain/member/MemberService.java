@@ -1,26 +1,36 @@
 package org.example.domain.member;
 
-import org.example.domain.member.dto.MemberEditForm;
-import org.example.domain.member.dto.MemberForm;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.domain.language.Language;
+import org.example.domain.member.dto.request.MemberEditForm;
+import org.example.domain.member.dto.request.MemberJoinForm;
+import org.example.domain.member.dto.response.MemberDTO;
 import org.example.domain.member.entity.Member;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Slf4j
 public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    @Autowired
-    public MemberService(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
-
     // 회원가입
-    public Member addMember(MemberForm memberForm){
-        return memberRepository.save(Member.createMember(memberForm));
+    @Transactional
+    public Member addMember(MemberJoinForm memberForm){
+        Member member = Member.createMember(memberForm);
 
+        for(String lang : memberForm.getLearning()) {
+            Language language = Language.createLanguage(lang);
+            member.addLearning(language);
+        }
+
+        memberRepository.save(member); // language 도 함께 저장
+        return member;
     }
 
     // 사용자 프로필 조회
@@ -38,6 +48,7 @@ public class MemberService {
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
+    @Transactional
     public Member modifyMember(Long user_id, MemberEditForm memberEditForm){
 
         Member member = memberRepository.findById(user_id);
@@ -45,7 +56,13 @@ public class MemberService {
         if(member == null) {
             throw new RuntimeException("존재하지 않는 사용자입니다.");
         }
+        member.clearLearnings();
 
+        for (String lang : memberEditForm.getLearning()) {
+            Language language = Language.createLanguage(lang);
+            member.addLearning(language);
+        }
         return member.editMember(memberEditForm);
+
     }
 }

@@ -1,16 +1,16 @@
 package org.example.domain.member;
 
-import org.example.domain.member.dto.MemberEditForm;
-import org.example.domain.member.dto.MemberForm;
-import org.example.domain.member.entity.Member;
+import org.example.domain.member.dto.request.MemberEditForm;
+import org.example.domain.member.dto.request.MemberJoinForm;
 
 import java.util.List;
+
 
 public class MemberTestFixture {
 
     // 회원 가입 성공
-    public static MemberForm createMemberForm() {
-        return MemberForm.builder()
+    public static MemberJoinForm createMemberForm() {
+        return MemberJoinForm.builder()
                 .email("valid@example.com")  // 유효한 이메일
                 .username("validUsername")  // 20자 이하
                 .password("validPassword123")  // 8자 이상
@@ -26,13 +26,13 @@ public class MemberTestFixture {
         return MemberEditForm.builder()
                 .username("updatedUsername")
                 .nationality("CAN")
-                .native_lang("fr")
+                .nativeLang("fr")
                 .learning(List.of("es", "cn"))  // 허용된 언어 코드 리스트
                 .introduction("This is my updated introduction.")  // 50자 이하
                 .build();
     }
 
-    // 사용자
+    /*
     public static Member fakeMember() {
         return Member.builder()
                 .id(1L)
@@ -40,10 +40,10 @@ public class MemberTestFixture {
                 .username("validUsername")
                 .password("validPassword123")
                 .nationality("USA")
-                .native_lang("en")
+                .nativeLang("en")
                 .learning(List.of("fr", "ja"))
                 .introduction("I am learning languages!")
                 .build();
     }
-
+    */
 }

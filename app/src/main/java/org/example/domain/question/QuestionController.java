@@ -7,7 +7,7 @@ import org.example.domain.member.entity.Member;
 import org.example.domain.question.dto.request.CommentForm;
 import org.example.domain.question.dto.request.QuestionCreateForm;
 import org.example.domain.question.dto.request.QuestionEditForm;
-import org.example.domain.question.entity.Comment;
+import org.example.domain.comment.Comment;
 import org.example.domain.question.entity.Question;
 import org.example.domain.session.SessionConst;
 import org.springframework.beans.factory.annotation.Autowired;

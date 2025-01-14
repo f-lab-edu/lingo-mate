@@ -1,4 +1,4 @@
-package org.example.domain.member.dto;
+package org.example.domain.member.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -21,7 +21,7 @@ public class MemberEditForm {
     @Pattern(
             regexp = "^(ko|en|ja|cn|fr|ar|es|ru)$",
             message = "허용되지 않은 언어 코드입니다. (ko, en, ja, cn, fr, ar, es, ru만 허용)"
-    ) private String native_lang;
+    ) private String nativeLang;
 
     @Size(min = 1, max = 5, message = "학습 언어는 1~5개까지 선택 가능합니다.") // 리스트 전체에 대한 검증
     private List<@Pattern(
