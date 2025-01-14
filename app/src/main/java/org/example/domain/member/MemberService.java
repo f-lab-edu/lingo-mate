@@ -9,6 +9,8 @@ import org.example.domain.member.entity.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -19,10 +21,10 @@ public class MemberService {
 
     // 회원가입
     @Transactional
-    public Member addMember(MemberJoinRequest MemberJoinRequest){
-        Member member = Member.createMember(MemberJoinRequest);
+    public Member addMember(MemberJoinRequest memberJoinRequest){
+        Member member = Member.createMember(memberJoinRequest);
 
-        for(String lang : MemberJoinRequest.getLearning()) {
+        for(String lang : memberJoinRequest.getLearning()) {
             Language language = Language.createLanguage(lang);
             member.addLearning(language);
         }
@@ -31,27 +33,18 @@ public class MemberService {
     }
 
     // 사용자 프로필 조회
-    public Member findMember(Long user_id){
-
-        Member member = memberRepository.findById(user_id).get();
-
-        // 사용자 조회 실패
-        if(member == null) {
-            throw new RuntimeException("존재하지 않는 사용자입니다.");
-        }
+    public Member findMember(Long userId){
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
 
         return member;
     }
 
     // 사용자 프로필 수정
     @Transactional
-    public Member modifyMember(Long user_id, MemberEditRequest memberEditRequest){
+    public Member modifyMember(Long userId, MemberEditRequest memberEditRequest){
 
-        Member member = memberRepository.findById(user_id).get();
-
-        if(member == null) {
-            throw new RuntimeException("존재하지 않는 사용자입니다.");
-        }
+        Member member = memberRepository.findById(userId).orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
 
         member.clearLearnings();
 

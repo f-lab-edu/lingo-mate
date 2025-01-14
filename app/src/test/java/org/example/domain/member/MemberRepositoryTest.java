@@ -29,7 +29,7 @@ class MemberRepositoryTest {
         //When
         Member findMember = memberRepository.findByEmail("valid@example.com").orElseThrow();
         //Then
-        // 통과 실패 Assertions.assertThat(findMember).isEqualTo(member); 
+        //Note: 통과 실패 Assertions.assertThat(findMember).isEqualTo(member);
         assertThat(findMember.getEmail()).isEqualTo(member.getEmail());
 
     }

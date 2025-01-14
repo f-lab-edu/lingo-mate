@@ -20,21 +20,21 @@ class MemberServiceTest {
     @Test
     void addMember() {
         //Given
-        MemberJoinRequest MemberJoinRequest = MemberTestFixture.createMemberJoinRequest();
+        MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
 
         //When
-        Member member = memberService.addMember(MemberJoinRequest);
+        Member member = memberService.addMember(memberJoinRequest);
 
         //Then
-        assertThat(member.getEmail()).isEqualTo(MemberJoinRequest.getEmail());
-        assertThat(member.getPassword()).isEqualTo(MemberJoinRequest.getPassword());
+        assertThat(member.getEmail()).isEqualTo(memberJoinRequest.getEmail());
+        assertThat(member.getPassword()).isEqualTo(memberJoinRequest.getPassword());
     }
 
     @Test
     void findMember() {
         //Given
-        MemberJoinRequest MemberJoinRequest = MemberTestFixture.createMemberJoinRequest();
-        Member member = memberService.addMember(MemberJoinRequest);
+        MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
+        Member member = memberService.addMember(memberJoinRequest);
 
         //When
         Member findMember = memberService.findMember(member.getId());
@@ -46,8 +46,8 @@ class MemberServiceTest {
     @Test
     void modifyMember() {
         //Given
-        MemberJoinRequest MemberJoinRequest = MemberTestFixture.createMemberJoinRequest();
-        Member member = memberService.addMember(MemberJoinRequest);
+        MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
+        Member member = memberService.addMember(memberJoinRequest);
 
         //When
         Member editMember = memberService.modifyMember(member.getId(), MemberTestFixture.createValidMemberEditForm());

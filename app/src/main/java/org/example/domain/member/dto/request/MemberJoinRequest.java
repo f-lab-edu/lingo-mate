@@ -34,7 +34,7 @@ public class MemberJoinRequest {
             regexp = "^(ko|en|ja|cn|fr|ar|es|ru)$",
             message = "허용되지 않은 언어 코드입니다. (ko, en, ja, cn, fr, ar, es, ru만 허용)"
     )
-    private String native_lang;
+    private String nativeLang;
 
     @Size(min = 1, max = 5, message = "학습 언어는 1~5개까지 선택 가능합니다.")
     private List<@Pattern(

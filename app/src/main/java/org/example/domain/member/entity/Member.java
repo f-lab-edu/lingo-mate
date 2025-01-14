@@ -39,27 +39,29 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WordBook> wordbooks = new ArrayList<WordBook>();
 
+    private Member(final MemberJoinRequest memberJoinRequest) {
+        this.email = memberJoinRequest.getEmail();
+        this.username = memberJoinRequest.getUsername();
+        this.password = memberJoinRequest.getPassword();
+        this.nationality = memberJoinRequest.getNationality();
+        this.nativeLang = memberJoinRequest.getNativeLang();
+        this.introduction = memberJoinRequest.getIntroduction();
+        this.follower = 0;
+        this.following = 0;
+        this.point = 50;
+    }
+
     //  생성 메서드
-    static public Member createMember(MemberJoinRequest MemberJoinRequest) {
-        Member member = new Member();
-        member.email = MemberJoinRequest.getEmail();
-        member.username = MemberJoinRequest.getUsername();
-        member.password = MemberJoinRequest.getPassword();
-        member.nationality = MemberJoinRequest.getNationality();
-        member.nativeLang = MemberJoinRequest.getNative_lang();
-        member.introduction = MemberJoinRequest.getIntroduction();
-        member.follower = 0;
-        member.following = 0;
-        member.point = 0;
-        return member;
+    static public Member createMember(final MemberJoinRequest memberJoinRequest) {
+        return new Member(memberJoinRequest);
     }
 
     // 임시 수정 메서드
-    public Member editMember(MemberEditRequest form) {
-        if (form.getUsername() != null) this.username = form.getUsername();
-        if (form.getNationality() != null) this.nationality = form.getNationality();
-        if (form.getNativeLang() != null) this.nativeLang = form.getNativeLang();
-        if (form.getIntroduction() != null) this.introduction = form.getIntroduction();
+    public Member editMember(final MemberEditRequest request) {
+        if (request.getUsername() != null) this.username = request.getUsername();
+        if (request.getNationality() != null) this.nationality = request.getNationality();
+        if (request.getNativeLang() != null) this.nativeLang = request.getNativeLang();
+        if (request.getIntroduction() != null) this.introduction = request.getIntroduction();
         return this;
     }
 

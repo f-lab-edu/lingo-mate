@@ -16,8 +16,8 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/add")
-    public ResponseEntity<MemberResponse> memberAdd(@Valid @RequestBody MemberJoinRequest MemberJoinRequest) {
-        Member savedMember = memberService.addMember(MemberJoinRequest);
+    public ResponseEntity<MemberResponse> memberAdd(@Valid @RequestBody MemberJoinRequest memberJoinRequest) {
+        Member savedMember = memberService.addMember(memberJoinRequest);
         MemberResponse memberResponse = MemberResponse.createMemberResponse(savedMember);
         return ResponseEntity.status(201).body(memberResponse);
 
@@ -33,8 +33,8 @@ public class MemberController {
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
-    public ResponseEntity<MemberResponse> memberModify(@PathVariable(value = "user_id") Long user_id, @Valid @RequestBody MemberEditRequest memberEditRequest) {
-        Member updateMember = memberService.modifyMember(user_id, memberEditRequest);
+    public ResponseEntity<MemberResponse> memberModify(@PathVariable(value = "user_id") Long userId, @Valid @RequestBody MemberEditRequest memberEditRequest) {
+        Member updateMember = memberService.modifyMember(userId, memberEditRequest);
         MemberResponse memberResponse = MemberResponse.createMemberResponse(updateMember);
         return ResponseEntity.ok().body(memberResponse);
     }

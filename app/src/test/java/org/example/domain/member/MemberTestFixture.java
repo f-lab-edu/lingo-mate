@@ -16,7 +16,7 @@ public class MemberTestFixture {
                 .username("validUsername")  // 20자 이하
                 .password("validPassword123")  // 8자 이상
                 .nationality("USA")
-                .native_lang("en")  // 허용된 언어 코드
+                .nativeLang("en")  // 허용된 언어 코드
                 .learning(List.of("fr", "ja"))  // 허용된 언어 코드 리스트
                 .introduction("I am learning languages!")  // 50자 이하
                 .build();

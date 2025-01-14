@@ -25,10 +25,10 @@ class MemberControllerTest {
     @Test
     void memberAdd() {
         //Given
-        MemberJoinRequest MemberJoinRequest = MemberTestFixture.createMemberJoinRequest();
+        MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
 
         //When
-        ResponseEntity<MemberResponse> response = memberController.memberAdd(MemberJoinRequest);
+        ResponseEntity<MemberResponse> response = memberController.memberAdd(memberJoinRequest);
 
         //Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -59,7 +59,7 @@ class MemberControllerTest {
     void memberModify() {
         //Given
         Member member = MemberTestFixture.createMember();
-        Member saveMember = memberRepository.save(member);
+        memberRepository.save(member);
 
         MemberEditRequest validMemberEditRequest = MemberTestFixture.createValidMemberEditForm();
 
