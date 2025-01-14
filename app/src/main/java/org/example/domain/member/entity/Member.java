@@ -3,8 +3,8 @@ package org.example.domain.member.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.domain.language.Language;
-import org.example.domain.member.dto.request.MemberEditForm;
-import org.example.domain.member.dto.request.MemberJoinForm;
+import org.example.domain.member.dto.request.MemberEditRequest;
+import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.question.entity.Question;
 import org.example.domain.wordbook.entity.WordBook;
 
@@ -15,7 +15,6 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,35 +31,31 @@ public class Member {
     private int point;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<Language> learnings = new ArrayList<Language>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<Question> questions = new ArrayList<Question>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<WordBook> wordbooks = new ArrayList<WordBook>();
 
     //  생성 메서드
-    static public Member createMember(MemberJoinForm memberForm) {
-        Member member = Member.builder()
-                .email(memberForm.getEmail())
-                .username(memberForm.getUsername())
-                .password(memberForm.getPassword())
-                .nationality(memberForm.getNationality())
-                .nativeLang(memberForm.getNative_lang())
-                .introduction(memberForm.getIntroduction())
-                .follower(0)
-                .following(0)
-                .point(0)
-                .build();
+    static public Member createMember(MemberJoinRequest MemberJoinRequest) {
+        Member member = new Member();
+        member.email = MemberJoinRequest.getEmail();
+        member.username = MemberJoinRequest.getUsername();
+        member.password = MemberJoinRequest.getPassword();
+        member.nationality = MemberJoinRequest.getNationality();
+        member.nativeLang = MemberJoinRequest.getNative_lang();
+        member.introduction = MemberJoinRequest.getIntroduction();
+        member.follower = 0;
+        member.following = 0;
+        member.point = 0;
         return member;
     }
 
     // 임시 수정 메서드
-    public Member editMember(MemberEditForm form) {
+    public Member editMember(MemberEditRequest form) {
         if (form.getUsername() != null) this.username = form.getUsername();
         if (form.getNationality() != null) this.nationality = form.getNationality();
         if (form.getNativeLang() != null) this.nativeLang = form.getNativeLang();
@@ -80,10 +75,6 @@ public class Member {
             language.setMember(null); // 연관 관계 제거
         }
         this.learnings.clear(); // 리스트 비우기
-    }
-    public void removeLearning(Language language) {
-        this.learnings.remove(language);
-        language.setMember(null); // 연관관계 제거
     }
 
     public void addQuestion(Question question) {

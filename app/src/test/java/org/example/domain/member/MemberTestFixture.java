@@ -1,7 +1,8 @@
 package org.example.domain.member;
 
-import org.example.domain.member.dto.request.MemberEditForm;
-import org.example.domain.member.dto.request.MemberJoinForm;
+import org.example.domain.member.dto.request.MemberEditRequest;
+import org.example.domain.member.dto.request.MemberJoinRequest;
+import org.example.domain.member.entity.Member;
 
 import java.util.List;
 
@@ -9,8 +10,8 @@ import java.util.List;
 public class MemberTestFixture {
 
     // 회원 가입 성공
-    public static MemberJoinForm createMemberForm() {
-        return MemberJoinForm.builder()
+    public static MemberJoinRequest createMemberJoinRequest() {
+        return MemberJoinRequest.builder()
                 .email("valid@example.com")  // 유효한 이메일
                 .username("validUsername")  // 20자 이하
                 .password("validPassword123")  // 8자 이상
@@ -22,8 +23,8 @@ public class MemberTestFixture {
     }
 
     // 사용자 프로필 수정
-    public static MemberEditForm createValidMemberEditForm() {
-        return MemberEditForm.builder()
+    public static MemberEditRequest createValidMemberEditForm() {
+        return MemberEditRequest.builder()
                 .username("updatedUsername")
                 .nationality("CAN")
                 .nativeLang("fr")
@@ -32,18 +33,8 @@ public class MemberTestFixture {
                 .build();
     }
 
-    /*
-    public static Member fakeMember() {
-        return Member.builder()
-                .id(1L)
-                .email("valid@example.com")
-                .username("validUsername")
-                .password("validPassword123")
-                .nationality("USA")
-                .nativeLang("en")
-                .learning(List.of("fr", "ja"))
-                .introduction("I am learning languages!")
-                .build();
+    // 사용자 생성
+    public static Member createMember( ){
+        return Member.createMember(MemberTestFixture.createMemberJoinRequest());
     }
-    */
 }
