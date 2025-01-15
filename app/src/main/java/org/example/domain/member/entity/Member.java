@@ -26,6 +26,7 @@ public class Member {
     private String nationality;
     private String nativeLang;
     private String introduction;
+    private String role;
     private int follower;
     private int following;
     private int point;
@@ -51,10 +52,12 @@ public class Member {
         this.point = 50;
     }
 
+
     //  생성 메서드
     static public Member createMember(final MemberJoinRequest memberJoinRequest) {
         return new Member(memberJoinRequest);
     }
+
 
     // 임시 수정 메서드
     public Member editMember(final MemberEditRequest request) {
