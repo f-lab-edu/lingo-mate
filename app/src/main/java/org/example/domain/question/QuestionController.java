@@ -2,15 +2,14 @@ package org.example.domain.question;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.domain.auth.annotation.LoginMember;
+import org.example.domain.auth.jwt.JWTUtil;
+import org.example.domain.member.MemberRepository;
 import org.example.domain.member.entity.Member;
-import org.example.domain.question.dto.request.CommentForm;
-import org.example.domain.question.dto.request.QuestionCreateForm;
-import org.example.domain.question.dto.request.QuestionEditForm;
-import org.example.domain.comment.Comment;
-import org.example.domain.question.entity.Question;
-import org.example.domain.session.SessionConst;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.domain.question.dto.QuestionResponse;
+import org.example.domain.question.dto.request.QuestionCreateRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,42 +17,49 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/question")
+@RequestMapping("/api/question")
+@RequiredArgsConstructor
 public class QuestionController {
 
     private final QuestionService questionService;
+    private final JWTUtil jwtUtil;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    public QuestionController(QuestionService questionService) {
-        this.questionService = questionService;
+    public Member loginCheck(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        String username = jwtUtil.getUsername(token);
+        return memberRepository.findByUsername(username).get();
+
     }
 
     // 질문 생성
     @PostMapping("/create")
-    public ResponseEntity<Question> questionAdd(@Valid @RequestBody QuestionCreateForm createForm, HttpServletRequest request) {
-        Member member = (Member)request.getSession().getAttribute(SessionConst.LOGIN_MEMBER);
-        Question newQuestion = questionService.addQuestion(createForm, member.getUsername());
-        return ResponseEntity.ok().body(newQuestion);
+    public ResponseEntity<QuestionResponse> questionAdd(@LoginMember String username, @Valid @RequestBody QuestionCreateRequest questionCreateRequest, HttpServletRequest request) {
+        log.debug("username = {}", username);
+        QuestionResponse response = questionService.addQuestion(questionCreateRequest, username);
+        return ResponseEntity.ok().body(response);
     }
 
-    // 질문 조회
-    @GetMapping("/{q_id}")
-    public ResponseEntity<Question> questionDetails(@PathVariable(value = "q_id") Long questionId) {
-        Question question = questionService.findQuestion(questionId);
-        return ResponseEntity.ok().body(question);
+    // 사용자 생성 질문 조회
+    @GetMapping("/{member_id}")
+    public ResponseEntity<List<QuestionResponse>> questionDetails(@PathVariable(value = "member_id") Long memberId) {
+        List<QuestionResponse> response = questionService.findQuestion(memberId);
+        return ResponseEntity.ok().body(response);
     }
 
+    /*
     // 질문 수정
-    @PutMapping("/{q_id}/edit")
-    public ResponseEntity<Question> questionModify(@PathVariable(value = "q_id") Long questionId,
-                                                   @RequestBody QuestionEditForm updatedQuestion) {
+    @PutMapping("/{question_id}/edit")
+    public ResponseEntity<Question> questionModify(@PathVariable(value = "question_Id") Long questionId,
+                                                   @RequestBody QuestionEditRequest updatedQuestion,
+                                                   HttpServletRequest request) {
         Question modifiedQuestion = questionService.modifyQuestion(questionId, updatedQuestion);
         return ResponseEntity.ok().body(modifiedQuestion);
     }
 
     // 질문 삭제
-    @DeleteMapping("/{q_id}")
-    public ResponseEntity<Question> questionRemove(@PathVariable(value = "q_id") Long questionId) {
+    @DeleteMapping("/{question_id}")
+    public ResponseEntity<Question> questionRemove(@PathVariable(value = "question_id") Long questionId) {
         Question question = questionService.removeQuestion(questionId);
         return ResponseEntity.ok().body(question);
     }
@@ -74,12 +80,12 @@ public class QuestionController {
     }
 
     // 질문 댓글 추가
-    @PostMapping("/{q_id}/comments")
-    public ResponseEntity<Question> commentAdd(@PathVariable(value = "q_id") Long questionId,
-                               @Valid @RequestBody CommentForm commentForm, HttpServletRequest request)
+    @PostMapping("/{question_id}/comments")
+    public ResponseEntity<Question> commentAdd(@PathVariable(value = "question_id") Long questionId,
+                                               @Valid @RequestBody CommentRequest commentRequest, HttpServletRequest request)
     {
         Member member = (Member) request.getSession().getAttribute(SessionConst.LOGIN_MEMBER);
-        Question question = questionService.addComment(questionId, commentForm, member);
+        Question question = questionService.addComment(questionId, commentRequest, member);
         return ResponseEntity.ok().body(question);
     }
 
@@ -87,7 +93,7 @@ public class QuestionController {
     @PutMapping("/{q_id}/comments/{c_id}")
     public ResponseEntity<Question> commentModify(@PathVariable(value = "q_id") Long questionId,
                                 @PathVariable(value = "c_id") Long commentId,
-                            @Valid @RequestBody CommentForm commentEditForm,
+                            @Valid @RequestBody CommentRequest commentEditForm,
                           HttpServletRequest request) {
         log.debug("here");
         Member member = (Member)request.getSession().getAttribute(SessionConst.LOGIN_MEMBER);
@@ -105,4 +111,5 @@ public class QuestionController {
         return ResponseEntity.ok().body(comment);
     }
 
+     */
 }

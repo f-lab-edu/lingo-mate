@@ -3,7 +3,7 @@ package org.example.domain.comment;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.domain.member.entity.Member;
-import org.example.domain.question.dto.request.CommentForm;
+import org.example.domain.question.dto.request.CommentRequest;
 import org.example.domain.question.entity.Question;
 
 import java.time.LocalDateTime;
@@ -29,14 +29,14 @@ public class Comment {
     @JoinColumn(name = "question_id")
     private Question question;
 
-    public static Comment createComment(CommentForm commentForm, Member member) {
+    public static Comment createComment(CommentRequest commentRequest, Member member) {
         return Comment.builder().id(++sequence)
-                .comment(commentForm.getComment())
+                .comment(commentRequest.getComment())
                 .build();
     }
 
-    public Comment editComment(CommentForm commentForm) {
-        this.comment = commentForm.getComment();
+    public Comment editComment(CommentRequest commentRequest) {
+        this.comment = commentRequest.getComment();
         this.updatedAt = LocalDateTime.now();
         return this;
     }

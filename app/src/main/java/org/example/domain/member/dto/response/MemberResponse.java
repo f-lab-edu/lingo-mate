@@ -20,6 +20,7 @@ public class MemberResponse {
     private int follower;
     private int following;
     private int point;
+    private String role;
 
     public static MemberResponse createMemberResponse(Member member) {
         List<Language> learnings = member.getLearnings();
@@ -36,6 +37,7 @@ public class MemberResponse {
         dto.follower = member.getFollower();
         dto.following = member.getFollowing();
         dto.point = member.getPoint();
+        dto.role = member.getRole();
         return dto;
     }
 }

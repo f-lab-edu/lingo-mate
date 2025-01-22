@@ -1,57 +1,24 @@
 package org.example.domain.question;
 
-import lombok.extern.slf4j.Slf4j;
-import org.example.domain.question.dto.request.QuestionCreateForm;
+import org.example.domain.member.entity.Member;
 import org.example.domain.question.entity.Question;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
-import static org.example.domain.question.entity.Question.createQuestion;
-
-@Slf4j
 @Repository
-public class QuestionRepository {
+public interface QuestionRepository extends JpaRepository<Question, Long> {
 
-    private static ConcurrentHashMap<Long, Question> store = new ConcurrentHashMap<>();
+    @Query("SELECT q FROM Question q WHERE q.title LIKE %:keyword% OR q.content LIKE %:keyword%")
+    List<Question> findByKeyword(@Param("keyword") String keyword);
 
-    public Question save(QuestionCreateForm createForm, String loggedUsername) {
-        Question newQuestion = createQuestion(createForm, loggedUsername);
-        store.put(newQuestion.getId(), newQuestion);
-        return newQuestion;
-    }
+    @Query("SELECT q FROM Question q WHERE q.member.id = :memberId")
+    List<Question> findByMemberId(@Param("memberId") Long memberId);
 
-    public Question findById(Long q_id) {
-        return store.get(q_id);
-    }
-
-    public List<Question> findAll() {
-        return new ArrayList<>(store.values());
-    }
-
-    public Question deleteById(Long q_id) {
-        return store.remove(q_id);
-    }
-
-    public List<Question> findByKeyword(String keyword) {
-        ArrayList<Question> questions = new ArrayList<>(store.values());
-        ArrayList<Question> searchedQuestion = new ArrayList<>();
-        for (Question question : questions) {
-            String content = question.getContent();
-            String title = question.getTitle();
-
-            if(content.contains(keyword) || title.contains(keyword)){
-                searchedQuestion.add(question);
-            }
-        }
-        return searchedQuestion;
-    }
-
-    public void cleanStore() {
-        store.clear();
-    }
-
-
+    @Query("SELECT m FROM Member m WHERE m.username = :username")
+    Optional<Member> findMemberByUsername(@Param("username") String username);
 }
