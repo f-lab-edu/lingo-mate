@@ -1,15 +1,18 @@
 package org.example.domain.member;
 
+import org.example.domain.language.Language;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
+import org.example.domain.member.dto.response.MemberResponse;
 import org.example.domain.member.entity.Member;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class MemberTestFixture {
 
-    // 회원 가입 성공
+    // 회원 가입 요청
     public static MemberJoinRequest createMemberJoinRequest() {
         return MemberJoinRequest.builder()
                 .email("valid@example.com")  // 유효한 이메일
@@ -22,8 +25,13 @@ public class MemberTestFixture {
                 .build();
     }
 
+    // 회원 가입 성공
+    public static MemberResponse createMemberResponse() {
+        return MemberResponse.createMemberResponse(createMember());
+    }
+
     // 사용자 프로필 수정
-    public static MemberEditRequest createValidMemberEditForm() {
+    public static MemberEditRequest createMemberEditRequest() {
         return MemberEditRequest.builder()
                 .username("updatedUsername")
                 .nationality("CAN")
@@ -33,8 +41,14 @@ public class MemberTestFixture {
                 .build();
     }
 
+    public static Member createByMysqlMember() {
+        return Member.createMember(MemberTestFixture.createMemberJoinRequest());
+    }
     // 사용자 생성
     public static Member createMember( ){
-        return Member.createMember(MemberTestFixture.createMemberJoinRequest());
+        Member member = Member.createMember(MemberTestFixture.createMemberJoinRequest());
+        member.setId(1L);
+        member.setLearnings(new ArrayList<>(List.of(Language.createLanguage("fr"), Language.createLanguage("ja"))));
+        return member;
     }
 }

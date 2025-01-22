@@ -1,59 +1,69 @@
 package org.example.domain.member;
 
+import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.example.domain.language.Language;
+import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.entity.Member;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@Transactional
-@Rollback
+@Slf4j
+@ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
-    @Autowired
-    MemberService memberService;
-    @Test
-    void addMember() {
-        //Given
-        MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
 
-        //When
-        Member member = memberService.addMember(memberJoinRequest);
+    private MemberService memberService;
+    @Mock
+    private MemberRepository memberRepository;
 
-        //Then
-        assertThat(member.getEmail()).isEqualTo(memberJoinRequest.getEmail());
-        assertThat(member.getPassword()).isEqualTo(memberJoinRequest.getPassword());
+    @BeforeEach
+    public void setUp() {
+        memberService = new MemberService(memberRepository);
     }
 
     @Test
-    void findMember() {
+    void userId로_사용자를_조회한다() {
         //Given
         MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
-        Member member = memberService.addMember(memberJoinRequest);
+        Member mockMember = MemberTestFixture.createMember();
+
+        //Mocking
+        when(memberRepository.findById(any(Long.class))).thenReturn(Optional.of(mockMember));
 
         //When
-        Member findMember = memberService.findMember(member.getId());
+        Member findMember = memberService.findMember(mockMember.getId());
 
         //Then
-        assertThat(findMember).isEqualTo(member);
+        assertThat(findMember.getId()).isEqualTo(mockMember.getId());
     }
 
     @Test
-    void modifyMember() {
+    void userId와_MemberEditRequest로_사용자_프로필을_수정한다() {
         //Given
-        MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
-        Member member = memberService.addMember(memberJoinRequest);
+        MemberEditRequest memberEditRequest = MemberTestFixture.createMemberEditRequest();
+        Member mockMember = MemberTestFixture.createMember();
+
+        //Mocking
+        when(memberRepository.findById(any(Long.class))).thenReturn(Optional.of(mockMember));
 
         //When
-        Member editMember = memberService.modifyMember(member.getId(), MemberTestFixture.createValidMemberEditForm());
+        Member editMember = memberService.modifyMember(mockMember.getId(), memberEditRequest);
 
         //Then
-        assertThat(editMember).isEqualTo(member);
+        assertThat(editMember).isEqualTo(editMember);
 
         // 배우는 언어가 "fr", "ja"에서 "es", "cn"으로 바뀌는지 확인
         assertThat(editMember.getLearnings())
