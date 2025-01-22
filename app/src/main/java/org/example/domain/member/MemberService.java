@@ -6,6 +6,7 @@ import org.example.domain.language.Language;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.entity.Member;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +19,15 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     // 회원가입
     @Transactional
     public Member addMember(MemberJoinRequest memberJoinRequest){
+
+        // 암호화
+        String password = memberJoinRequest.getPassword();
+        memberJoinRequest.setPassword(bCryptPasswordEncoder.encode(password));
+
         Member member = Member.createMember(memberJoinRequest);
 
         for(String lang : memberJoinRequest.getLearning()) {
