@@ -29,15 +29,15 @@ public class AuthService {
 
         // 이메일로 Member 조회
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("회원가입 되어 있지 않습니다."));
-        Long member_id = member.getId();
+        Long memberId = member.getId();
         String username = member.getUsername();
-        log.debug("member_id = {}",member_id);
+        log.debug("memberId = {}",memberId);
         log.debug("username = {}",username);
 
 
         // AccessToken, RefreshToken 생성
-        String accessToken = jwtUtil.createAccessToken(member_id, username, "USER");
-        String refreshToken = jwtUtil.createRefreshToken(member_id, username, "USER");
+        String accessToken = jwtUtil.createAccessToken(memberId, username, "USER");
+        String refreshToken = jwtUtil.createRefreshToken(memberId, username, "USER");
 
         // refreshToken DB 저장
         AuthEntity authEntity = AuthEntity.createWith(refreshToken);

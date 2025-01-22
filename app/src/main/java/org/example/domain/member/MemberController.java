@@ -15,6 +15,14 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final MemberService memberService;
 
+    @PostMapping("/add")
+    public ResponseEntity<MemberResponse> memberAdd(@Valid @RequestBody MemberJoinRequest memberJoinRequest) {
+        Member savedMember = memberService.addMember(memberJoinRequest);
+        MemberResponse memberResponse = MemberResponse.createMemberResponse(savedMember);
+        return ResponseEntity.status(201).body(memberResponse);
+
+    }
+
     // 사용자 프로필 조회, 사용자 기본 정보 제공
     @GetMapping("/{user_id}")
     public ResponseEntity<MemberResponse> memberDetails(@PathVariable(value = "user_id") Long userId) {
