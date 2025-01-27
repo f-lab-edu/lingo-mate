@@ -1,6 +1,5 @@
 package org.example.domain.member.dto.request;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -10,7 +9,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class MemberEditForm {
+public class MemberEditRequest {
 
     @Size(max = 20, message = "사용자 이름은 최대 20글자 입니다.")
     private String username;

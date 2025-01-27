@@ -1,24 +1,34 @@
 package org.example.domain.global.config;
 
-import org.example.domain.global.config.interceptor.LoginCheckInterceptor;
+import lombok.RequiredArgsConstructor;
+import org.example.domain.auth.interceptor.LoginCheckInterceptor;
+import org.example.domain.auth.resolver.LoginMemberArgumentResolver;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
+@RequiredArgsConstructor
 @Configuration
-@Profile("!test")
 public class WebMvcConfig implements WebMvcConfigurer {
-    /*
+    private final LoginMemberArgumentResolver loginMemberArgumentResolver;
+    private final LoginCheckInterceptor loginCheckInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginCheckInterceptor())
+        registry.addInterceptor(loginCheckInterceptor)
                 .order(1)
-                .addPathPatterns("/**")
-                .excludePathPatterns(
-                        "/profile/add",
-                        "/login", "/logout");
+                .addPathPatterns("/api/**")
+                .excludePathPatterns("/auth/**");
     }
 
-     */
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(loginMemberArgumentResolver);
+    }
+
+
 }

@@ -1,15 +1,13 @@
-package org.example.domain.login.dto.request;
+package org.example.domain.auth.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
-@AllArgsConstructor
-public class LoginForm {
+@Builder
+@Getter
+public class LoginRequest {
 
     @NotBlank(message = "이메일은 반드시 입력해야 합니다.")
     @Email(message = "유효한 이메일 형식이 아닙니다.")

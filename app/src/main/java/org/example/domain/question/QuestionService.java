@@ -2,21 +2,26 @@ package org.example.domain.question;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.member.entity.Member;
-import org.example.domain.question.dto.request.CommentForm;
-import org.example.domain.question.dto.request.QuestionCreateForm;
-import org.example.domain.question.dto.request.QuestionEditForm;
+import org.example.domain.question.dto.QuestionResponse;
+import org.example.domain.question.dto.request.CommentRequest;
+import org.example.domain.question.dto.request.QuestionCreateRequest;
+import org.example.domain.question.dto.request.QuestionEditRequest;
 import org.example.domain.comment.Comment;
 import org.example.domain.question.entity.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.example.domain.comment.Comment.*;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class QuestionService {
     private final QuestionRepository questionRepository;
     @Autowired
@@ -32,22 +37,24 @@ public class QuestionService {
     }
 
     // 질문 생성
-    public Question addQuestion(QuestionCreateForm createForm, String loggedUsername) {
-        Question question = questionRepository.save(createForm, loggedUsername);
-        return question;
+    @Transactional
+    public QuestionResponse addQuestion(QuestionCreateRequest request, String username) {
+        Question question = Question.createQuestion(request);
+        Member member = questionRepository.findMemberByUsername(username)
+                .orElseThrow(() -> new RuntimeException("member를 찾지 못함"));
+        member.addQuestion(question);
+        return QuestionResponse.create(question);
     }
 
-    // 질문 조회
-    public Question findQuestion(Long questionId) {
 
-        Question question = questionRepository.findById(questionId);
-        isNullException(question);
-
-        return question;
+    // 사용자 생성 질문 조회
+    public List<QuestionResponse> findQuestion(Long memberId) {
+        List<Question> questions = questionRepository.findByMemberId(memberId);
+        return questions.stream().map(QuestionResponse::create).collect(Collectors.toList());
     }
-
+    /*
     // 질문 수정
-    public Question modifyQuestion(Long questionId, QuestionEditForm updatedQuestion) {
+    public Question modifyQuestion(Long questionId, QuestionEditRequest updatedQuestion) {
 
         Question findQuestion = questionRepository.findById(questionId);
         isNullException(findQuestion);
@@ -80,20 +87,20 @@ public class QuestionService {
     }
 
     // 질문 댓글 추가
-    public Question addComment(Long questionId, CommentForm commentForm, Member member) {
+    public Question addComment(Long questionId, CommentRequest commentRequest, Member member) {
         // 댓글 달릴 질문 조회
         Question question = questionRepository.findById(questionId);
         isNullException(question);
 
         // 댓글 생성
-        Comment comment = createComment(commentForm, member);
+        Comment comment = createComment(commentRequest, member);
         question.addComment(comment);
 
         return question;
     }
 
     // 질문 댓글 수정
-    public Question modifyComment(Long questionId, Long commentId, CommentForm commentEditForm, Member member) {
+    public Question modifyComment(Long questionId, Long commentId, CommentRequest commentEditForm, Member member) {
 
         Question question = questionRepository.findById(questionId);
         isNullException(question);
@@ -110,4 +117,6 @@ public class QuestionService {
 
         return findQuestion.deleteComment(commentId);
     }
+
+     */
 }

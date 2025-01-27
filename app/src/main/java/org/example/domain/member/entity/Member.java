@@ -2,9 +2,10 @@ package org.example.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.domain.auth.entity.AuthEntity;
 import org.example.domain.language.Language;
-import org.example.domain.member.dto.request.MemberEditForm;
-import org.example.domain.member.dto.request.MemberJoinForm;
+import org.example.domain.member.dto.request.MemberEditRequest;
+import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.question.entity.Question;
 import org.example.domain.wordbook.entity.WordBook;
 
@@ -15,7 +16,6 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,44 +27,48 @@ public class Member {
     private String nationality;
     private String nativeLang;
     private String introduction;
+    private String role;
     private int follower;
     private int following;
     private int point;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<Language> learnings = new ArrayList<Language>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<Question> questions = new ArrayList<Question>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<WordBook> wordbooks = new ArrayList<WordBook>();
 
-    //  생성 메서드
-    static public Member createMember(MemberJoinForm memberForm) {
-        Member member = Member.builder()
-                .email(memberForm.getEmail())
-                .username(memberForm.getUsername())
-                .password(memberForm.getPassword())
-                .nationality(memberForm.getNationality())
-                .nativeLang(memberForm.getNative_lang())
-                .introduction(memberForm.getIntroduction())
-                .follower(0)
-                .following(0)
-                .point(0)
-                .build();
-        return member;
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private AuthEntity authEntity;
+    private Member(final MemberJoinRequest memberJoinRequest) {
+        this.email = memberJoinRequest.getEmail();
+        this.username = memberJoinRequest.getUsername();
+        this.password = memberJoinRequest.getPassword();
+        this.nationality = memberJoinRequest.getNationality();
+        this.nativeLang = memberJoinRequest.getNativeLang();
+        this.introduction = memberJoinRequest.getIntroduction();
+        this.role = "USER";
+        this.follower = 0;
+        this.following = 0;
+        this.point = 50;
     }
 
+
+    //  생성 메서드
+    static public Member createMember(final MemberJoinRequest memberJoinRequest) {
+        return new Member(memberJoinRequest);
+    }
+
+
     // 임시 수정 메서드
-    public Member editMember(MemberEditForm form) {
-        if (form.getUsername() != null) this.username = form.getUsername();
-        if (form.getNationality() != null) this.nationality = form.getNationality();
-        if (form.getNativeLang() != null) this.nativeLang = form.getNativeLang();
-        if (form.getIntroduction() != null) this.introduction = form.getIntroduction();
+    public Member editMember(final MemberEditRequest request) {
+        if (request.getUsername() != null) this.username = request.getUsername();
+        if (request.getNationality() != null) this.nationality = request.getNationality();
+        if (request.getNativeLang() != null) this.nativeLang = request.getNativeLang();
+        if (request.getIntroduction() != null) this.introduction = request.getIntroduction();
         return this;
     }
 
@@ -80,10 +84,6 @@ public class Member {
             language.setMember(null); // 연관 관계 제거
         }
         this.learnings.clear(); // 리스트 비우기
-    }
-    public void removeLearning(Language language) {
-        this.learnings.remove(language);
-        language.setMember(null); // 연관관계 제거
     }
 
     public void addQuestion(Question question) {
