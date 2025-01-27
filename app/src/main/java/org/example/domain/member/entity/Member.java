@@ -2,6 +2,7 @@ package org.example.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.domain.auth.entity.AuthEntity;
 import org.example.domain.language.Language;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
@@ -40,6 +41,8 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WordBook> wordbooks = new ArrayList<WordBook>();
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private AuthEntity authEntity;
     private Member(final MemberJoinRequest memberJoinRequest) {
         this.email = memberJoinRequest.getEmail();
         this.username = memberJoinRequest.getUsername();
@@ -47,6 +50,7 @@ public class Member {
         this.nationality = memberJoinRequest.getNationality();
         this.nativeLang = memberJoinRequest.getNativeLang();
         this.introduction = memberJoinRequest.getIntroduction();
+        this.role = "USER";
         this.follower = 0;
         this.following = 0;
         this.point = 50;
