@@ -2,6 +2,10 @@ package org.example.domain.auth.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import org.example.domain.auth.AuthService;
+import org.example.domain.auth.exception.AccessTokenNotFound;
+import org.example.domain.auth.exception.AuthorizationInfoNotExist;
+import org.example.domain.auth.exception.TokenExpired;
 import org.example.domain.auth.jwt.JWTLoginFilter;
 import org.example.domain.auth.jwt.JWTUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +32,13 @@ class JWTLoginFilterTest {
 
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
+    @Mock
+    private AuthService authService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        jwtLoginFilter = new JWTLoginFilter(jwtUtil);
+        jwtLoginFilter = new JWTLoginFilter(jwtUtil,authService);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
     }
@@ -53,54 +59,58 @@ class JWTLoginFilterTest {
     }
 
     @Test
-    void api경로는_인증_정보가_없으면_JWTLoginFilter에서_걸리고_401을_리턴한다 () throws ServletException, IOException {
+    void api로_시작하는_요청에_인증정보가_없으면_AuthorizationInfoNotExist가_발생한다 () throws ServletException, IOException {
 
         //Given
         request.setRequestURI("/api/resource");
 
-        //When
-        jwtLoginFilter.doFilter(request,response,filterChain);
-
-        //Then
-        verify(filterChain, never()).doFilter(request,response);
-        assertEquals(401, response.getStatus());
+        //When & Then
+        assertThrows(AuthorizationInfoNotExist.class, () -> jwtLoginFilter.doFilter(request,response,filterChain));
     }
 
     @Test
-    void api경로의_authorization이_Bearer로_시작하지_않으면_JWTLoginFilter에서_걸리고_401을_리턴한다 () throws ServletException, IOException {
+    void api로_시작하는_요청에_authorization헤더_값이_Bearer로_시작하지_않으면_AuthorizationInfoNotExist가_발생한다 () throws ServletException, IOException {
         //Given - Bearer로 시작하지 않은 Authorization 헤더
         request.setRequestURI("/api/resource");
         request.addHeader("Authorization", "Bear");
 
-        //When
-        jwtLoginFilter.doFilter(request,response,filterChain);
-
-        //Then
-        verify(filterChain, never()).doFilter(request,response);
-        assertEquals(401, response.getStatus());
+        //When & Then
+        assertThrows(AuthorizationInfoNotExist.class, () -> jwtLoginFilter.doFilter(request,response,filterChain));
     }
 
     @Test
-    void api경로의_토큰이_만료되었다면_JWTLoginFilter를_통과하지_못한다 () throws ServletException, IOException {
+    void api로_시작하는_요청의_토큰이_만료되었다면_TokenExpired가_발생한다 () throws ServletException, IOException {
         //Given
         request.setRequestURI("/api/resource");
         request.addHeader("Authorization", "Bearer expired");
         when(jwtUtil.isExpired("expired")).thenReturn(true);
 
-        //When
-        jwtLoginFilter.doFilter(request,response,filterChain);
-
-        //Then
-        verify(filterChain, never()).doFilter(request,response);
-        assertEquals(401, response.getStatus());
+        //When & Then
+        assertThrows(TokenExpired.class, () -> jwtLoginFilter.doFilter(request,response,filterChain));
     }
 
     @Test
-    void api경로의_토큰이_유효하면_JWTLoginFilter를_통과한다 () throws ServletException, IOException {
-        // 유효한 토큰
+    void api로_시작하는_요청의_엑세스토큰이_DB에_존재하지_않으면_AccessTokenNotFound가_발생한다(){
+        //Given
+        request.setRequestURI("/api/resource");
+        request.addHeader("Authorization", "Bearer expired");
+
+        //when
+        when(authService.isValidAccessToken(any(String.class))).thenReturn(false);
+
+        //then
+        assertThrows(AccessTokenNotFound.class, () -> jwtLoginFilter.doFilter(request, response, filterChain));
+    }
+
+    @Test
+    void api로_시작하는_요청의_토큰이_유효하다면_JWTLoginFilter를_통과한다 () throws ServletException, IOException {
+        // given
         request.setRequestURI("/api/resource");
         request.addHeader("Authorization", "Bearer validToken");
+
+        //when
         when(jwtUtil.isExpired("validToken")).thenReturn(false);
+        when(authService.isValidAccessToken(any(String.class))).thenReturn(true);
 
         jwtLoginFilter.doFilter(request, response, filterChain);
 

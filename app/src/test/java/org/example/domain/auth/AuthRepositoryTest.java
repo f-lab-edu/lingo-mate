@@ -30,7 +30,7 @@ class AuthRepositoryTest {
         Member member = MemberTestFixture.createMember();
         memberRepository.save(member);
         // org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated or deleted by another transaction (or unsaved-value mapping was incorrect): [org.example.domain.member.entity.Member#1]
-        AuthEntity authEntity = AuthEntity.createWith(AuthTestFixture.createRefreshToken());
+        AuthEntity authEntity = AuthEntity.createWith(AuthTestFixture.createAccessToken(),AuthTestFixture.createRefreshToken());
         authEntity.setMember(member);
         authRepository.save(authEntity);
     }

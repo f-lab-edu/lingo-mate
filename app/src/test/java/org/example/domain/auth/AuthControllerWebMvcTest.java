@@ -36,7 +36,7 @@ public class AuthControllerWebMvcTest extends MockBeanInjection {
         MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
         Member member = MemberTestFixture.createMember();
         when(memberService.addMember(any(MemberJoinRequest.class))).thenReturn(member);
-
+        System.out.println("aewgewaweg");
         // When & Then
         mockMvc.perform(post("/auth/join")
                         .contentType(MediaType.APPLICATION_JSON)

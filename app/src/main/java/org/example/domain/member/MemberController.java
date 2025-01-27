@@ -2,6 +2,8 @@ package org.example.domain.member;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.domain.auth.annotation.LoginMember;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.dto.response.MemberResponse;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
+@Slf4j
 public class MemberController {
     private final MemberService memberService;
 
@@ -26,6 +29,7 @@ public class MemberController {
     // 사용자 프로필 조회, 사용자 기본 정보 제공
     @GetMapping("/{user_id}")
     public ResponseEntity<MemberResponse> memberDetails(@PathVariable(value = "user_id") Long userId) {
+        System.out.println("awefgwaegrg");
         Member member = memberService.findMember(userId);
         MemberResponse memberResponse = MemberResponse.createMemberResponse(member);
         return ResponseEntity.ok().body(memberResponse);
@@ -36,6 +40,7 @@ public class MemberController {
     public ResponseEntity<MemberResponse> memberModify(@PathVariable(value = "user_id") Long userId, @Valid @RequestBody MemberEditRequest memberEditRequest) {
         Member updateMember = memberService.modifyMember(userId, memberEditRequest);
         MemberResponse memberResponse = MemberResponse.createMemberResponse(updateMember);
+        log.debug(""+memberResponse.getId());
         return ResponseEntity.ok().body(memberResponse);
     }
 }

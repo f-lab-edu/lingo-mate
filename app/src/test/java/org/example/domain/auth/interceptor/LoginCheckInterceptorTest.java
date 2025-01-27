@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.AssertTrue;
 import org.assertj.core.api.Assertions;
+import org.example.domain.auth.AuthService;
 import org.example.domain.auth.AuthenticationContext;
 import org.example.domain.auth.jwt.JWTUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,12 +13,15 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class LoginCheckInterceptorTest {
     private LoginCheckInterceptor loginCheckInterceptor;
     private AuthenticationContext authenticationContext;
+    @Mock
+    private AuthService authService;
     @Mock
     JWTUtil jwtUtil;
 
@@ -44,13 +48,14 @@ class LoginCheckInterceptorTest {
         String username = "test";
 
         when(request.getHeader("Authorization")).thenReturn(validToken);
-        when(jwtUtil.getUsername("valid")).thenReturn(username);
+        when(authService.isValidAccessToken(any(String.class))).thenReturn(true);
+        when(jwtUtil.getId("valid")).thenReturn(1L);
 
         //When
         boolean result = loginCheckInterceptor.preHandle(request, response, handler);
 
         //Then
         assertTrue(result);
-        Assertions.assertThat(authenticationContext.getPrincipal()).isEqualTo("test");
+        Assertions.assertThat(authenticationContext.getPrincipal()).isEqualTo(1L);
     }
 }

@@ -12,21 +12,21 @@ import java.util.Objects;
 @Slf4j
 public class AuthenticationContext {
     private static final String ANONYMOUS_USERNAME = "UNKNOWN";
-    private String username;
+    private Long acceptedMemberId;
 
-    public void setAuthentication(String username) {
-        this.username = username;
+    public void setAuthentication(Long acceptedMemberId) {
+        this.acceptedMemberId = acceptedMemberId;
     }
 
     public void setAnonymousUsername(){
-        this.username = ANONYMOUS_USERNAME;
+        this.acceptedMemberId = 0L;
     }
 
-    public String getPrincipal() {
-        if (Objects.isNull(this.username)) {
-            throw new RuntimeException("username is null");
+    public Long getPrincipal() {
+        if (Objects.isNull(this.acceptedMemberId)) {
+            throw new RuntimeException("acceptedMemberId is null");
         }
-        log.debug("authcontext username = {}", username);
-        return username;
+        log.debug("authcontext acceptedMemberId = {}", acceptedMemberId);
+        return acceptedMemberId;
     }
 }
