@@ -12,6 +12,7 @@ import org.example.domain.auth.entity.AuthEntity;
 import org.example.domain.auth.jwt.JWTUtil;
 import org.example.domain.member.MemberRepository;
 import org.example.domain.member.entity.Member;
+import org.example.domain.member.entity.Role;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +37,8 @@ public class AuthService {
 
 
         // AccessToken, RefreshToken 생성
-        String accessToken = jwtUtil.createAccessToken(memberId, username, "USER");
-        String refreshToken = jwtUtil.createRefreshToken(memberId, username, "USER");
+        String accessToken = jwtUtil.createAccessToken(memberId, username, Role.USER);
+        String refreshToken = jwtUtil.createRefreshToken(memberId, username, Role.USER);
 
         // refreshToken DB 저장
         AuthEntity authEntity = AuthEntity.createWith(refreshToken);
@@ -77,8 +78,6 @@ public class AuthService {
 
         // refreshToken을 파기한 후 다시 만들고 저정한다.
         authRepository.deleteByAuthId(authEntity.getId());
-        em.flush();
-        em.clear();
         String newRefreshToken = jwtUtil.createRefreshToken(member.getId(), member.getUsername(), member.getRole());
         AuthEntity newAuthEntity = AuthEntity.createWith(newRefreshToken);
         newAuthEntity.setMember(member);

@@ -8,6 +8,7 @@ import org.example.domain.auth.fixture.AuthTestFixture;
 import org.example.domain.member.MemberTestFixture;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.entity.Member;
+import org.example.domain.member.entity.Role;
 import org.example.helper.MockBeanInjection;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

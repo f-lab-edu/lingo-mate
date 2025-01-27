@@ -11,6 +11,7 @@ import org.example.domain.member.MemberTestFixture;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.dto.response.MemberResponse;
 import org.example.domain.member.entity.Member;
+import org.example.domain.member.entity.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ class AuthControllerIntegrationTest {
         assertThat(body.getFollower()).isEqualTo(0);
         assertThat(body.getFollowing()).isEqualTo(0);
         assertThat(body.getPoint()).isEqualTo(50);
-        assertThat(body.getRole()).isEqualTo("USER");
+        assertThat(body.getRole()).isEqualTo(Role.USER);
     }
 
     //@Test

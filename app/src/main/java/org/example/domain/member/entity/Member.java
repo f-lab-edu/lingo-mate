@@ -27,7 +27,9 @@ public class Member {
     private String nationality;
     private String nativeLang;
     private String introduction;
-    private String role;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
     private int follower;
     private int following;
     private int point;
@@ -50,7 +52,7 @@ public class Member {
         this.nationality = memberJoinRequest.getNationality();
         this.nativeLang = memberJoinRequest.getNativeLang();
         this.introduction = memberJoinRequest.getIntroduction();
-        this.role = "USER";
+        this.role = Role.USER;
         this.follower = 0;
         this.following = 0;
         this.point = 50;
