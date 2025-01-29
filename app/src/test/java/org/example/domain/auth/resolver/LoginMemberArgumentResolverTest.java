@@ -42,7 +42,7 @@ class LoginMemberArgumentResolverTest {
     void LoginMember_어노테이션과_문자열_타입을_만족하는지_확인한다() {
         // Given
         when(methodParameter.hasParameterAnnotation(LoginMember.class)).thenReturn(true);
-        when(methodParameter.getParameterType()).thenReturn((Class) String.class);
+        when(methodParameter.getParameterType()).thenReturn((Class) Long.class);
 
         // When
         boolean result = resolver.supportsParameter(methodParameter);

@@ -18,6 +18,7 @@ import org.example.domain.member.entity.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,7 +38,7 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-
+    @InjectMocks
     private AuthService authService;
     @Mock
     MemberRepository memberRepository;
@@ -45,12 +46,7 @@ class AuthServiceTest {
     private AuthRepository authRepository;
     @Mock
     private JWTUtil jwtUtil;
-    @Mock
-    private EntityManager em;
-    @BeforeEach
-    public void setUp() {
-        authService = new AuthService(memberRepository,authRepository,jwtUtil,em);
-    }
+
     @Test
     void 로그인_했을_때_refreshToken이_DB에_저장되었는지_확인한다() {
         // Given

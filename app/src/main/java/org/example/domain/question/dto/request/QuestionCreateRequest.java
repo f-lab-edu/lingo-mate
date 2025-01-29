@@ -2,13 +2,13 @@ package org.example.domain.question.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Builder
 public class QuestionCreateRequest {
-
-    //private String username;
 
     @NotBlank(message = "질문 언어를 입력하셔야 합니다.")
     @Pattern(

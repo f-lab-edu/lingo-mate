@@ -3,6 +3,7 @@ package org.example.domain.member.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.domain.auth.entity.AuthEntity;
+import org.example.domain.comment.Comment;
 import org.example.domain.language.Language;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
@@ -33,6 +34,10 @@ public class Member {
     private int follower;
     private int following;
     private int point;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<Comment>();
+
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Language> learnings = new ArrayList<Language>();
@@ -78,6 +83,11 @@ public class Member {
     public void addLearning(Language language) {
         this.learnings.add(language);
         language.setMember(this); // 연관관계 주인 쪽에도 설정
+    }
+
+    public void addComment(Comment comment){
+        this.comments.add(comment);
+        comment.setMember(this);
     }
 
     // 연관관계 초기화 메서드

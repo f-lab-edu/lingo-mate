@@ -9,6 +9,7 @@ import org.example.domain.member.entity.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +25,10 @@ import static org.mockito.Mockito.when;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
-
+    @InjectMocks
     private MemberService memberService;
     @Mock
     private MemberRepository memberRepository;
-
-    @BeforeEach
-    public void setUp() {
-        memberService = new MemberService(memberRepository);
-    }
 
     @Test
     void userId로_사용자를_조회한다() {

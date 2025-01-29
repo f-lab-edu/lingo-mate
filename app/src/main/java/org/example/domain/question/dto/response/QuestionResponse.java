@@ -1,13 +1,11 @@
-package org.example.domain.question.dto;
+package org.example.domain.question.dto.response;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 import org.example.domain.question.entity.Question;
 
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
+@Getter
 public class QuestionResponse {
     private String questionLanguage;
     private String title;
@@ -20,13 +18,12 @@ public class QuestionResponse {
         this.questionLanguage = question.getQuestionLanguage();
         this.title = question.getTitle();
         this.content = question.getContent();
-        this.createdAt = question.getCreatedAt();
-        this.updatedAt = question.getUpdatedAt();
         this.point = question.getPoint();
-
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
-    public static QuestionResponse create(Question question){
+
+    public static QuestionResponse create(final Question question){
         return new QuestionResponse(question);
     }
-
 }
