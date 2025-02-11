@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.domain.language.Language;
 import org.example.domain.member.entity.Member;
+import org.example.domain.member.entity.Role;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class MemberResponse {
     private int follower;
     private int following;
     private int point;
-    private String role;
+    private Role role;
 
     public static MemberResponse createMemberResponse(Member member) {
         List<Language> learnings = member.getLearnings();

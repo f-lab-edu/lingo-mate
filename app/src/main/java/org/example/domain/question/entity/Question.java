@@ -44,6 +44,10 @@ public class Question {
         this.updatedAt = LocalDateTime.now();
 
     }
+    // 생성 메서드
+    public static Question create(QuestionCreateRequest questionCreateRequest) {
+        return new Question(questionCreateRequest);
+    }
 
     // 연관관계 편의 메서드
     public void addComment(Comment comment) {
@@ -51,43 +55,24 @@ public class Question {
         comment.setQuestion(this);
     }
 
-    // 생성 메서드
-    public static Question createQuestion(QuestionCreateRequest questionCreateRequest) {
-        return new Question(questionCreateRequest);
-    }
 
-
-    public Question editQuestion(QuestionEditRequest updatedQuestion) {
-        if (updatedQuestion.getQuestion_language() != null) {
-            this.questionLanguage = updatedQuestion.getQuestion_language();
+    public Question editQuestion(QuestionEditRequest questionEditRequest) {
+        if (questionEditRequest.getQuestionLanguage() != null) {
+            this.questionLanguage = questionEditRequest.getQuestionLanguage();
         }
-        if (updatedQuestion.getTitle() != null) {
-            this.title = updatedQuestion.getTitle();
+        if (questionEditRequest.getTitle() != null) {
+            this.title = questionEditRequest.getTitle();
         }
-        if (updatedQuestion.getContent() != null) {
-            this.content = updatedQuestion.getContent();
+        if (questionEditRequest.getContent() != null) {
+            this.content = questionEditRequest.getContent();
         }
-        if (updatedQuestion.getPoint() != null) {
-            this.point = updatedQuestion.getPoint();
+        if (questionEditRequest.getPoint() != null) {
+            this.point = questionEditRequest.getPoint();
         }
 
         this.updatedAt = LocalDateTime.now();
 
         return this;
-    }
-
-
-
-    // 질문 댓글 수정
-    public void editComment(CommentRequest commentEditForm, Long comment_id) {
-
-    }
-
-
-    // 질문 삭제
-    public Comment deleteComment(Long comment_id){
-        Comment mockTest = Comment.builder().comment("mock test").build();
-        return mockTest;
     }
 
 }

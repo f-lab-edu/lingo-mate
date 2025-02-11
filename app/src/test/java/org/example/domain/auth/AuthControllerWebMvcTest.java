@@ -8,6 +8,7 @@ import org.example.domain.auth.fixture.AuthTestFixture;
 import org.example.domain.member.MemberTestFixture;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.entity.Member;
+import org.example.domain.member.entity.Role;
 import org.example.helper.MockBeanInjection;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class AuthControllerWebMvcTest extends MockBeanInjection {
         MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
         Member member = MemberTestFixture.createMember();
         when(memberService.addMember(any(MemberJoinRequest.class))).thenReturn(member);
-
+        System.out.println("aewgewaweg");
         // When & Then
         mockMvc.perform(post("/auth/join")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -27,7 +27,7 @@ public class AuthTestFixture {
     }
 
     public static AuthEntity createAuthEntity() {
-        return AuthEntity.createWith(createRefreshToken());
+        return AuthEntity.createWith(createAccessToken(),createRefreshToken());
     }
 
 

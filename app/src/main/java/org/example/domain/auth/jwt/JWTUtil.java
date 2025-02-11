@@ -1,6 +1,7 @@
 package org.example.domain.auth.jwt;
 
 import io.jsonwebtoken.Jwts;
+import org.example.domain.member.entity.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,15 +28,15 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
     }
 
-    public String getRole(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
+    public Role getRole(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", Role.class);
     }
 
     public Boolean isExpired(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createAccessToken(Long member_id, String username, String role) {
+    public String createAccessToken(Long member_id, String username, Role role) {
         return Jwts.builder()
                 .claim("member_id", member_id)
                 .claim("username", username)
@@ -46,7 +47,7 @@ public class JWTUtil {
                 .compact();
     }
 
-    public String createRefreshToken(Long member_id, String username, String role) {
+    public String createRefreshToken(Long member_id, String username, Role role) {
         return Jwts.builder()
                 .claim("member_id", member_id)
                 .claim("username", username)

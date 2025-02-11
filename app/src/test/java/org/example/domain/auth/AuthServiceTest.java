@@ -11,12 +11,14 @@ import org.example.domain.auth.dto.response.TokenResponse;
 import org.example.domain.auth.entity.AuthEntity;
 import org.example.domain.auth.fixture.AuthTestFixture;
 import org.example.domain.auth.jwt.JWTUtil;
+import org.example.domain.global.exception.GlobalException;
 import org.example.domain.member.MemberRepository;
 import org.example.domain.member.MemberTestFixture;
 import org.example.domain.member.entity.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,7 +38,7 @@ import static org.mockito.Mockito.*;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-
+    @InjectMocks
     private AuthService authService;
     @Mock
     MemberRepository memberRepository;
@@ -44,12 +46,7 @@ class AuthServiceTest {
     private AuthRepository authRepository;
     @Mock
     private JWTUtil jwtUtil;
-    @Mock
-    private EntityManager em;
-    @BeforeEach
-    public void setUp() {
-        authService = new AuthService(memberRepository,authRepository,jwtUtil,em);
-    }
+
     @Test
     void 로그인_했을_때_refreshToken이_DB에_저장되었는지_확인한다() {
         // Given
@@ -110,7 +107,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void refreshToken이_만료되었다면__401에러를_발생시킨다() {
+    void refreshToken이_만료되었다면_TokenExpired가_발생한다() {
         // Given
         RefreshRequest refreshRequest = AuthTestFixture.createRefreshRequest();
 
@@ -119,8 +116,8 @@ class AuthServiceTest {
         doNothing().when(authRepository).deleteByRefreshToken(refreshRequest.getRefreshToken());
 
         // When
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.reissueRefreshToken(refreshRequest));
-        assertEquals(exception.getMessage(),"다시 로그인 하세요.");
+        GlobalException globalException = assertThrows(GlobalException.class, () -> authService.reissueRefreshToken(refreshRequest));
+        assertEquals("TOKEN_EXPIRED", globalException.getName());
 
     }
 
@@ -134,10 +131,10 @@ class AuthServiceTest {
         when(jwtUtil.getId(refreshRequest.getAccessToken())).thenReturn(1L);
         when(jwtUtil.getId(refreshRequest.getRefreshToken())).thenReturn(2L);
         // When
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.reissueRefreshToken(refreshRequest));
+        GlobalException globalException = assertThrows(GlobalException.class, () -> authService.reissueRefreshToken(refreshRequest));
 
         // Then
-        assertEquals("Access Token, Refresh Token의 사용자 ID가 일치하지 않습니다.", exception.getMessage());
+        assertEquals("TOKEN_IDS_MISMATCH_EXCEPTION", globalException.getName());
 
     }
 }

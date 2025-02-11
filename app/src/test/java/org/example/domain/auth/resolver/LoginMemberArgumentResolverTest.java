@@ -42,7 +42,7 @@ class LoginMemberArgumentResolverTest {
     void LoginMember_어노테이션과_문자열_타입을_만족하는지_확인한다() {
         // Given
         when(methodParameter.hasParameterAnnotation(LoginMember.class)).thenReturn(true);
-        when(methodParameter.getParameterType()).thenReturn((Class) String.class);
+        when(methodParameter.getParameterType()).thenReturn((Class) Long.class);
 
         // When
         boolean result = resolver.supportsParameter(methodParameter);
@@ -56,13 +56,13 @@ class LoginMemberArgumentResolverTest {
     @Test
     void resolveArgument는_authentication_context의_principal값을_리턴한다() throws Exception {
         //Given
-        when(authenticationContext.getPrincipal()).thenReturn("user");
+        when(authenticationContext.getPrincipal()).thenReturn(1L);
 
         //When
-        String result = (String)resolver.resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory);
+        Long result = (Long)resolver.resolveArgument(methodParameter, modelAndViewContainer, nativeWebRequest, webDataBinderFactory);
 
         //Then
-        Assertions.assertThat(result).isEqualTo("user");
+        Assertions.assertThat(result).isEqualTo(1L);
     }
 
 }

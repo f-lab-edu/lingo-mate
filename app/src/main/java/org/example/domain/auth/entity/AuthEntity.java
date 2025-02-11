@@ -14,17 +14,19 @@ public class AuthEntity {
     @Column(name = "auth_id")
     public Long id;
     public String refreshToken;
+    public String accessToken;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     public Member member;
 
-    private AuthEntity(String refreshToken) {
+    private AuthEntity(String refreshToken, String accessToken) {
         this.refreshToken = refreshToken;
+        this.accessToken = accessToken;
     }
 
-    public static AuthEntity createWith(final String refreshToken){
-        return new AuthEntity(refreshToken);
+    public static AuthEntity createWith(final String refreshToken, final String accessToken){
+        return new AuthEntity(refreshToken, accessToken);
     }
     public void setMember(Member member) {
         this.member = member;

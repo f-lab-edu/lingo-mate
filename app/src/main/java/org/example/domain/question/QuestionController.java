@@ -5,15 +5,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.auth.annotation.LoginMember;
-import org.example.domain.auth.jwt.JWTUtil;
-import org.example.domain.member.MemberRepository;
-import org.example.domain.member.entity.Member;
-import org.example.domain.question.dto.QuestionResponse;
+import org.example.domain.comment.Comment;
+import org.example.domain.comment.CommentResponse;
+import org.example.domain.question.dto.response.QuestionResponse;
+import org.example.domain.question.dto.request.CommentRequest;
 import org.example.domain.question.dto.request.QuestionCreateRequest;
+import org.example.domain.question.dto.request.QuestionEditRequest;
+import org.example.domain.question.entity.Question;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -22,94 +25,87 @@ import java.util.List;
 public class QuestionController {
 
     private final QuestionService questionService;
-    private final JWTUtil jwtUtil;
-    private final MemberRepository memberRepository;
-
-    public Member loginCheck(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
-        String username = jwtUtil.getUsername(token);
-        return memberRepository.findByUsername(username).get();
-
-    }
 
     // 질문 생성
     @PostMapping("/create")
-    public ResponseEntity<QuestionResponse> questionAdd(@LoginMember String username, @Valid @RequestBody QuestionCreateRequest questionCreateRequest, HttpServletRequest request) {
-        log.debug("username = {}", username);
-        QuestionResponse response = questionService.addQuestion(questionCreateRequest, username);
-        return ResponseEntity.ok().body(response);
-    }
-
-    // 사용자 생성 질문 조회
-    @GetMapping("/{member_id}")
-    public ResponseEntity<List<QuestionResponse>> questionDetails(@PathVariable(value = "member_id") Long memberId) {
-        List<QuestionResponse> response = questionService.findQuestion(memberId);
-        return ResponseEntity.ok().body(response);
-    }
-
-    /*
-    // 질문 수정
-    @PutMapping("/{question_id}/edit")
-    public ResponseEntity<Question> questionModify(@PathVariable(value = "question_Id") Long questionId,
-                                                   @RequestBody QuestionEditRequest updatedQuestion,
-                                                   HttpServletRequest request) {
-        Question modifiedQuestion = questionService.modifyQuestion(questionId, updatedQuestion);
-        return ResponseEntity.ok().body(modifiedQuestion);
-    }
-
-    // 질문 삭제
-    @DeleteMapping("/{question_id}")
-    public ResponseEntity<Question> questionRemove(@PathVariable(value = "question_id") Long questionId) {
-        Question question = questionService.removeQuestion(questionId);
-        return ResponseEntity.ok().body(question);
+    public ResponseEntity<QuestionResponse> questionAdd(@LoginMember Long memberId, @Valid @RequestBody QuestionCreateRequest questionCreateRequest) {
+        log.debug("memberId = {}", memberId);
+        QuestionResponse questionResponse = questionService.addQuestion(questionCreateRequest, memberId);
+        return ResponseEntity.ok().body(questionResponse);
     }
 
     // 질문 목록 조회
     @GetMapping("/all")
-    public ResponseEntity<List<Question>> questionList() {
-        List<Question> allQuestion = questionService.findAllQuestion();
-        return ResponseEntity.ok().body(allQuestion);
+    public ResponseEntity<Page<QuestionResponse>> questionList(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<QuestionResponse> questionResponses = questionService.findAllQuestion(pageable);
+        return ResponseEntity.ok().body(questionResponses);
+    }
+
+    // 사용자 생성 질문 조회
+    @GetMapping("/my-questions")
+    public ResponseEntity<Page<QuestionResponse>> questionDetails(
+            @LoginMember Long memberId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<QuestionResponse> questionResponses = questionService.findQuestionByMemberId(pageable, memberId);
+        return ResponseEntity.ok().body(questionResponses);
     }
 
 
-    // 키워드 질문 검색
-    @GetMapping("/search")
-    public ResponseEntity<List<Question>> questionSearch(@RequestParam("keyword") String keyword) {
-        List<Question> questions = questionService.searchQuestion(keyword);
-        return ResponseEntity.ok().body(questions);
+    // 질문 수정 - 권환 체크 필요
+    @PutMapping("/{question_id}/edit")
+    public ResponseEntity<QuestionResponse> questionModify(@LoginMember Long memberId, @PathVariable(value = "question_id") Long questionId,
+                               @RequestBody QuestionEditRequest questionEditRequest) {
+        Question question = questionService.modifyQuestion(memberId, questionId, questionEditRequest);
+        QuestionResponse questionResponse = QuestionResponse.create(question);
+        return ResponseEntity.ok(questionResponse);
+    }
+
+    // 질문 삭제 - 반환값?
+    @DeleteMapping("/{question_id}/delete")
+    public ResponseEntity<Void> questionRemove(@LoginMember Long memberId, @PathVariable(value = "question_id") Long questionId) {
+        questionService.removeQuestion(memberId,questionId);
+        return ResponseEntity.ok().build();
     }
 
     // 질문 댓글 추가
     @PostMapping("/{question_id}/comments")
-    public ResponseEntity<Question> commentAdd(@PathVariable(value = "question_id") Long questionId,
-                                               @Valid @RequestBody CommentRequest commentRequest, HttpServletRequest request)
-    {
-        Member member = (Member) request.getSession().getAttribute(SessionConst.LOGIN_MEMBER);
-        Question question = questionService.addComment(questionId, commentRequest, member);
-        return ResponseEntity.ok().body(question);
+    public ResponseEntity<CommentResponse> commentAdd(@LoginMember Long memberId, @PathVariable(value = "question_id") Long questionId,
+                           @Valid @RequestBody CommentRequest commentRequest) {
+        Comment comment = questionService.addComment(questionId, memberId, commentRequest);
+        CommentResponse commentResponse = CommentResponse.create(comment);
+        return ResponseEntity.ok(commentResponse);
     }
 
     // 질문 댓글 수정
-    @PutMapping("/{q_id}/comments/{c_id}")
-    public ResponseEntity<Question> commentModify(@PathVariable(value = "q_id") Long questionId,
-                                @PathVariable(value = "c_id") Long commentId,
-                            @Valid @RequestBody CommentRequest commentEditForm,
-                          HttpServletRequest request) {
-        log.debug("here");
-        Member member = (Member)request.getSession().getAttribute(SessionConst.LOGIN_MEMBER);
-        log.debug("member = {}", member);
-        Question question = questionService.modifyComment(questionId, commentId, commentEditForm, member);
-        return ResponseEntity.ok().body(question);
+    @PutMapping("/{question_id}/comments/{comment_id}")
+    public ResponseEntity<CommentResponse> commentModify(@PathVariable(value = "question_id") Long questionId,
+                              @PathVariable(value = "comment_id") Long commentId,
+                              @LoginMember Long memberId,
+                              @Valid @RequestBody CommentRequest CommentRequest) {
+        Comment comment = questionService.modifyComment(questionId, commentId, memberId, CommentRequest);
+        CommentResponse commentResponse = CommentResponse.create(comment);
+        return ResponseEntity.ok(commentResponse);
+
     }
 
     // 질문 댓글 삭제
-    @DeleteMapping("/{q_id}/comments/{c_id}")
-    public ResponseEntity<Comment> commentRemove(@PathVariable(value = "q_id") Long questionId,
-                                  @PathVariable(value = "c_id") Long commentId)
-    {
-        Comment comment = questionService.removeComment(questionId, commentId);
-        return ResponseEntity.ok().body(comment);
+    @DeleteMapping("/{question_id}/comments/{comment_id}")
+    public ResponseEntity<Void> commentRemove(@PathVariable(value = "question_id") Long questionId,
+                              @PathVariable(value = "comment_id") Long commentId,
+                              @LoginMember Long memberId) {
+        questionService.removeComment(questionId,commentId,memberId);
+        return ResponseEntity.ok().build();
     }
 
-     */
+    // 질문 검색???
+    @GetMapping("/search")
+    public void questionSearch(@RequestParam("keyword") String keyword) {
+
+    }
+
 }
