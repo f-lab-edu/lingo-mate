@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.domain.comment.Comment;
 import org.example.domain.comment.CommentRepository;
 import org.example.domain.member.MemberRepository;
+import org.example.domain.member.MemberService;
 import org.example.domain.member.entity.Member;
 import org.example.domain.question.dto.request.CommentRequest;
 import org.example.domain.question.dto.response.QuestionResponse;
@@ -29,12 +30,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QuestionService {
     private final QuestionRepository questionRepository;
+    private final MemberService memberService;
     private final CommentRepository commentRepository;
 
     // 질문 생성
     public QuestionResponse addQuestion(QuestionCreateRequest request, Long memberId) {
         Question question = Question.create(request);
-        Member member = questionRepository.findMemberById(memberId).orElseThrow(MemberNotFound::new);
+        Member member = memberService.findMember(memberId);
+        //Member member = questionRepository.findMemberById(memberId).orElseThrow(MemberNotFound::new);
         member.addQuestion(question);
         return QuestionResponse.create(question);
     }
@@ -84,7 +87,7 @@ public class QuestionService {
 
         // 연관관계 설정
         question.addComment(comment);
-        Member member = questionRepository.findMemberById(memberId).orElseThrow(MemberNotFound::new);
+        Member member = memberService.findMember(memberId);
         member.addComment(comment);
 
         return comment;
@@ -132,12 +135,6 @@ public class QuestionService {
         commentRepository.deleteById(commentId);
     }
 
-    /*
-    // 키워드 질문 검색
-        public List<Question> searchQuestion(@RequestParam("keyword") String keyword) {
-            List<Question> searched = questionRepository.findByKeyword(keyword);
-            return searched;
-      }
-     */
+    // 질문 검색 기능..
 
 }

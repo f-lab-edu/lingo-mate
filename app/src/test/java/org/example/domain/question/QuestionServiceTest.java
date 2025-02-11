@@ -3,6 +3,7 @@ package org.example.domain.question;
 import org.assertj.core.api.Assertions;
 import org.example.domain.comment.Comment;
 import org.example.domain.comment.CommentRepository;
+import org.example.domain.member.MemberService;
 import org.example.domain.member.MemberTestFixture;
 import org.example.domain.member.entity.Member;
 import org.example.domain.question.dto.request.CommentRequest;
@@ -36,6 +37,8 @@ class QuestionServiceTest {
 
     @Mock
     private QuestionRepository questionRepository;
+    @Mock
+    private MemberService memberService;
 
     @Mock
     private CommentRepository commentRepository;
@@ -48,7 +51,7 @@ class QuestionServiceTest {
         Long memberId = 1L;
 
         //Mocking
-        when(questionRepository.findMemberById(any(Long.class))).thenReturn(Optional.of(mockMember));
+        when(memberService.findMember(any(Long.class))).thenReturn(mockMember);
 
         //When
         QuestionResponse questionResponse = questionService.addQuestion(questionCreateRequest, memberId);
@@ -149,7 +152,7 @@ class QuestionServiceTest {
 
         //Mocking
         when(questionRepository.findById(anyLong())).thenReturn(Optional.of(question));
-        when(questionRepository.findMemberById(anyLong())).thenReturn(Optional.of(member));
+        when(memberService.findMember(any(Long.class))).thenReturn(member);
 
         //When
         Comment addedComment = questionService.addComment(questionId, memberId, commentRequest);

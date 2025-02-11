@@ -40,7 +40,7 @@ public class MemberController {
     public ResponseEntity<MemberResponse> memberModify(@PathVariable(value = "user_id") Long userId, @Valid @RequestBody MemberEditRequest memberEditRequest) {
         Member updateMember = memberService.modifyMember(userId, memberEditRequest);
         MemberResponse memberResponse = MemberResponse.createMemberResponse(updateMember);
-        log.debug(""+memberResponse.getId());
+        log.debug("{}", memberResponse.getId());
         return ResponseEntity.ok().body(memberResponse);
     }
 }
