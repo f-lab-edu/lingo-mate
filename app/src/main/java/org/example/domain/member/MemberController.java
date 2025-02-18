@@ -9,7 +9,11 @@ import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.dto.response.MemberResponse;
 import org.example.domain.member.entity.Member;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -18,29 +22,40 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final MemberService memberService;
 
-    @PostMapping("/add")
-    public ResponseEntity<MemberResponse> memberAdd(@Valid @RequestBody MemberJoinRequest memberJoinRequest) {
-        Member savedMember = memberService.addMember(memberJoinRequest);
-        MemberResponse memberResponse = MemberResponse.createMemberResponse(savedMember);
-        return ResponseEntity.status(201).body(memberResponse);
-
-    }
-
     // 사용자 프로필 조회, 사용자 기본 정보 제공
     @GetMapping("/{user_id}")
-    public ResponseEntity<MemberResponse> memberDetails(@PathVariable(value = "user_id") Long userId) {
-        System.out.println("awefgwaegrg");
-        Member member = memberService.findMember(userId);
-        MemberResponse memberResponse = MemberResponse.createMemberResponse(member);
-        return ResponseEntity.ok().body(memberResponse);
+    @Async
+    public CompletableFuture<ResponseEntity<MemberResponse>> memberDetails(@PathVariable(value = "user_id") Long userId) {
+        return CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<Member> member = memberService.findMember(userId);
+            MemberResponse memberResponse = null;
+            try {
+                memberResponse = MemberResponse.createMemberResponse(member.get());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            return ResponseEntity.ok().body(memberResponse);
+        });
     }
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
-    public ResponseEntity<MemberResponse> memberModify(@PathVariable(value = "user_id") Long userId, @Valid @RequestBody MemberEditRequest memberEditRequest) {
-        Member updateMember = memberService.modifyMember(userId, memberEditRequest);
-        MemberResponse memberResponse = MemberResponse.createMemberResponse(updateMember);
-        log.debug("{}", memberResponse.getId());
-        return ResponseEntity.ok().body(memberResponse);
+    @Async
+    public CompletableFuture<ResponseEntity<MemberResponse>> memberModify(@PathVariable(value = "user_id") Long userId, @Valid @RequestBody MemberEditRequest memberEditRequest) {
+        return CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<Member> updateMember = memberService.modifyMember(userId, memberEditRequest);
+            MemberResponse memberResponse = null;
+            try {
+                memberResponse = MemberResponse.createMemberResponse(updateMember.get());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            log.debug("{}", memberResponse.getId());
+            return ResponseEntity.ok().body(memberResponse);
+        });
     }
 }

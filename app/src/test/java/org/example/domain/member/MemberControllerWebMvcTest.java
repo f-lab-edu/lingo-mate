@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,11 +32,13 @@ class MemberControllerWebMvcTest extends MockBeanInjection {
         //Given & When
         Member member = MemberTestFixture.createMember();
         when(authService.isValidAccessToken(any(String.class))).thenReturn(true);
-        when(memberService.findMember(any(Long.class))).thenReturn(member);
+        when(memberService.findMember(any(Long.class))).thenReturn(CompletableFuture.completedFuture(member));
 
         //Then
-        mockMvc.perform(get("/api/profile/1").header(AUTHORIZATION, token))
-                .andExpect(status().isOk())
+        MvcResult mvcResult = mockMvc.perform(get("/api/profile/1").header(AUTHORIZATION, token))
+                .andExpect(status().isOk()).andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.email").value("valid@example.com"))
                 .andExpect(jsonPath("$.username").value("validUsername"));
@@ -48,13 +52,15 @@ class MemberControllerWebMvcTest extends MockBeanInjection {
         MemberEditRequest memberEditRequest = MemberTestFixture.createMemberEditRequest();
         Member updatedMember = member.editMember(memberEditRequest);
         when(authService.isValidAccessToken(any(String.class))).thenReturn(true);
-        when(memberService.modifyMember(any(Long.class), any(MemberEditRequest.class))).thenReturn(updatedMember);
+        when(memberService.modifyMember(any(Long.class), any(MemberEditRequest.class))).thenReturn(CompletableFuture.completedFuture(updatedMember));
 
         //Then
-        mockMvc.perform(put("/api/profile/1/edit")
-                        .header("Authorization", "Bearer " + token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(memberEditRequest)))
+        MvcResult mvcResult = mockMvc.perform(put("/api/profile/1/edit")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberEditRequest))).andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("updatedUsername"));
     }

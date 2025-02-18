@@ -25,6 +25,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,17 +46,17 @@ class QuestionServiceTest {
     private CommentRepository commentRepository;
 
     @Test
-    void 질문_생성을_확인한다() {
+    void 질문_생성을_확인한다() throws ExecutionException, InterruptedException {
         //Given
         QuestionCreateRequest questionCreateRequest = QuestionTestFixture.createQuestionCreateRequest();
         Member mockMember = QuestionTestFixture.createMockMember();
         Long memberId = 1L;
 
         //Mocking
-        when(memberService.findMember(any(Long.class))).thenReturn(mockMember);
+        when(memberService.findMember(any(Long.class))).thenReturn(CompletableFuture.completedFuture(mockMember));
 
         //When
-        QuestionResponse questionResponse = questionService.addQuestion(questionCreateRequest, memberId);
+        QuestionResponse questionResponse = questionService.addQuestion(questionCreateRequest, memberId).get();
 
         //Then
         assertThat(questionResponse.getQuestionLanguage()).isEqualTo("en");
@@ -64,7 +66,7 @@ class QuestionServiceTest {
     }
 
     @Test
-    void 질문을_10개씩_페이징한다() {
+    void 질문을_10개씩_페이징한다() throws ExecutionException, InterruptedException {
         //Given
         Pageable pageable = PageRequest.of(1, 10);
         List<Question> question20 = QuestionTestFixture.createQuestion20();
@@ -74,7 +76,7 @@ class QuestionServiceTest {
         when(questionRepository.findAll(any(Pageable.class))).thenReturn(page);
 
         //When
-        Page<QuestionResponse> result = questionService.findAllQuestion(pageable);
+        Page<QuestionResponse> result = questionService.findAllQuestion(pageable).get();
 
         //Then
         assertThat(result.getTotalElements()).isEqualTo(20);
@@ -85,7 +87,7 @@ class QuestionServiceTest {
     }
 
     @Test
-    void 사용자가_자신이_등록한_질문을_10개씩_페이징한다(){
+    void 사용자가_자신이_등록한_질문을_10개씩_페이징한다() throws ExecutionException, InterruptedException {
         //Given
         Pageable pageable = PageRequest.of(1, 10);
         List<Question> question20 = QuestionTestFixture.createQuestion20();
@@ -96,7 +98,7 @@ class QuestionServiceTest {
         when(questionRepository.findByMemberId(any(Pageable.class),any(Long.class))).thenReturn(page);
 
         //When
-        Page<QuestionResponse> result = questionService.findQuestionByMemberId(pageable, memberId);
+        Page<QuestionResponse> result = questionService.findQuestionByMemberId(pageable, memberId).get();
 
         //Then
         assertThat(result.getTotalElements()).isEqualTo(20);
@@ -106,7 +108,7 @@ class QuestionServiceTest {
     }
 
     @Test
-    void 사용자_자신이_생성한_질문은_수정할_수_있다() {
+    void 사용자_자신이_생성한_질문은_수정할_수_있다() throws ExecutionException, InterruptedException {
         //Given
         Long questionId = 0L;
         Long memberId = 0L;
@@ -115,7 +117,7 @@ class QuestionServiceTest {
         //Mocking
         when(questionRepository.findById(any(Long.class))).thenReturn(Optional.of(question));
         //When
-        Question modifiedQuestion = questionService.modifyQuestion(memberId, questionId, questionEditRequest);
+        Question modifiedQuestion = questionService.modifyQuestion(memberId, questionId, questionEditRequest).get();
         //Then
         assertThat(modifiedQuestion.getQuestionLanguage()).isEqualTo("ja");
         assertThat(modifiedQuestion.getTitle()).isEqualTo("ありがとう");
@@ -137,7 +139,7 @@ class QuestionServiceTest {
     }
 
     @Test
-    void 질문에_댓글을_추가한다() {
+    void 질문에_댓글을_추가한다() throws ExecutionException, InterruptedException {
         //Given
         Long questionId = 0L;
         Long memberId = 1L;
@@ -152,10 +154,10 @@ class QuestionServiceTest {
 
         //Mocking
         when(questionRepository.findById(anyLong())).thenReturn(Optional.of(question));
-        when(memberService.findMember(any(Long.class))).thenReturn(member);
+        when(memberService.findMember(any(Long.class))).thenReturn(CompletableFuture.completedFuture(member));
 
         //When
-        Comment addedComment = questionService.addComment(questionId, memberId, commentRequest);
+        Comment addedComment = questionService.addComment(questionId, memberId, commentRequest).get();
 
         //Then
         assertThat(addedComment.getComment()).isEqualTo("댓글1");
@@ -163,7 +165,7 @@ class QuestionServiceTest {
     }
 
     @Test
-    void 사용자_자신이_작성한_댓글은_수정할_수_있다() {
+    void 사용자_자신이_작성한_댓글은_수정할_수_있다() throws ExecutionException, InterruptedException {
         //Given
         Long questionId = 0L;
         Long commentId = 0L;
@@ -181,14 +183,14 @@ class QuestionServiceTest {
         when(questionRepository.findById(anyLong())).thenReturn(Optional.of(question));
 
         //When
-        Comment modifiedComment = questionService.modifyComment(questionId, commentId, memberId, commentRequest);
+        Comment modifiedComment = questionService.modifyComment(questionId, commentId, memberId, commentRequest).get();
 
         //Then
         Assertions.assertThat(modifiedComment.getComment()).isEqualTo("수정 댓글1");
     }
 
     @Test
-    void 사용자_자신이_작성한_댓글은_삭제할_수_있다(){
+    void 사용자_자신이_작성한_댓글은_삭제할_수_있다() throws ExecutionException, InterruptedException {
         //Given
         Long questionId = 0L;
         Long commentId = 0L;
@@ -205,7 +207,7 @@ class QuestionServiceTest {
         when(questionRepository.findById(anyLong())).thenReturn(Optional.of(question));
 
         //When
-        questionService.removeComment(questionId,commentId,memberId);
+        questionService.removeComment(questionId,commentId,memberId).get();
 
         //Then
         verify(commentRepository, times(1)).deleteById(anyLong());
