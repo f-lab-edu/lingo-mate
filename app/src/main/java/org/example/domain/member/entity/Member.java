@@ -8,7 +8,7 @@ import org.example.domain.language.Language;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.question.entity.Question;
-import org.example.domain.wordbook.entity.WordBook;
+import org.example.domain.wordbook.entity.Wordbook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class Member {
     private List<Question> questions = new ArrayList<Question>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WordBook> wordbooks = new ArrayList<WordBook>();
+    private List<Wordbook> wordbooks = new ArrayList<Wordbook>();
 
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private AuthEntity authEntity;
@@ -108,12 +108,12 @@ public class Member {
         question.setMember(null); // 연관관계 제거
     }
 
-    public void addWordBook(WordBook wordBook) {
+    public void addWordBook(Wordbook wordBook) {
         this.wordbooks.add(wordBook);
         wordBook.setMember(this); // 연관관계 주인 쪽에도 설정
     }
 
-    public void removeWordBook(WordBook wordBook) {
+    public void removeWordBook(Wordbook wordBook) {
         this.wordbooks.remove(wordBook);
         wordBook.setMember(null); // 연관관계 제거
     }

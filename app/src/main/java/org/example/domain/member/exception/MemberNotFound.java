@@ -1,4 +1,4 @@
-package org.example.domain.question.exception;
+package org.example.domain.member.exception;
 
 import org.example.domain.global.exception.GlobalException;
 import org.springframework.http.HttpStatus;

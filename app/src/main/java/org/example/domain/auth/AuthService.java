@@ -101,8 +101,7 @@ public class AuthService {
 
     }
 
-    @Async
     public boolean isValidAccessToken(String accessToken){
-        return authRepository.findByAccessToken(accessToken);
+        return authRepository.findByAccessToken(accessToken).isPresent();
     }
 }

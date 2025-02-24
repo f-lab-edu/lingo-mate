@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.domain.auth.annotation.LoginMember;
 import org.example.domain.comment.Comment;
 import org.example.domain.comment.CommentResponse;
+import org.example.domain.member.MemberService;
+import org.example.domain.member.entity.Member;
 import org.example.domain.question.dto.response.QuestionResponse;
 import org.example.domain.question.dto.request.CommentRequest;
 import org.example.domain.question.dto.request.QuestionCreateRequest;
@@ -29,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 public class QuestionController {
 
     private final QuestionService questionService;
+    private final MemberService memberService;
 
     // 질문 생성
     @PostMapping("/create")
