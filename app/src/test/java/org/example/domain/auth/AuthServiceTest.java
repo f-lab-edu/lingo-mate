@@ -65,10 +65,10 @@ class AuthServiceTest {
 
 
         // When
-        CompletableFuture<TokenResponse> tokenResponse = authService.issueToken(loginRequest);
+        TokenResponse tokenResponse = authService.issueToken(loginRequest);
         // Then
-        String refreshToken = tokenResponse.get().getRefreshToken();
-        assertThat(authRepository.findByRefreshToken(refreshToken).get()).isNotNull();
+        String refreshToken = tokenResponse.getRefreshToken();
+        assertThat(authRepository.findByRefreshToken(refreshToken)).isNotNull();
     }
 
     @Test
@@ -97,10 +97,10 @@ class AuthServiceTest {
 
 
         //when
-        CompletableFuture<TokenResponse> tokenResponse = authService.reissueRefreshToken(refreshRequest);
+        TokenResponse tokenResponse = authService.reissueRefreshToken(refreshRequest);
 
         //Then
-        Assertions.assertThat(tokenResponse.get().getRefreshToken()).isEqualTo(newRefreshToken);
+        Assertions.assertThat(tokenResponse.getRefreshToken()).isEqualTo(newRefreshToken);
     }
 
     @Test
@@ -113,12 +113,7 @@ class AuthServiceTest {
                 .when(jwtUtil).isExpired(refreshRequest.getRefreshToken());
 
         // When & Then: 예외 발생 여부 검증
-        ExecutionException executionException = assertThrows(ExecutionException.class,
-                () -> authService.reissueRefreshToken(refreshRequest).get()); // `.get()`으로 CompletableFuture 실행 완료 대기
-
-        // 내부 cause가 TokenExpired인지 확인
-        Throwable cause = executionException.getCause();
-        assertInstanceOf(TokenExpired.class, cause);
+        assertThrows(TokenExpired.class, () -> authService.reissueRefreshToken(refreshRequest));
 
 
     }
@@ -133,11 +128,7 @@ class AuthServiceTest {
         when(jwtUtil.getId(refreshRequest.getAccessToken())).thenReturn(1L);
         when(jwtUtil.getId(refreshRequest.getRefreshToken())).thenReturn(2L);
         // When
-        ExecutionException executionException = assertThrows(ExecutionException.class, () -> authService.reissueRefreshToken(refreshRequest).get());
-
-        // Then
-        Throwable cause = executionException.getCause();
-        assertInstanceOf(TokenIdsMismatchException.class, cause);
+        assertThrows(TokenIdsMismatchException.class, () -> authService.reissueRefreshToken(refreshRequest));
 
     }
 }

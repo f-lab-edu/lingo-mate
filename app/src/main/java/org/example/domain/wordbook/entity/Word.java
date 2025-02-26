@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.domain.wordbook.dto.request.WordCreateRequest;
+import org.example.domain.wordbook.dto.request.WordUpdateRequest;
 import org.example.domain.wordbook.entity.Wordbook;
 
 import java.util.ArrayList;
@@ -51,5 +52,12 @@ public class Word {
         return new Word(wordCreateRequest);
     }
 
+    // 수정 메서드
+    public void update(WordUpdateRequest wordUpdateRequest) {
+        this.word = wordUpdateRequest.getWord();
+        this.mean = wordUpdateRequest.getMean();
+        this.ex = wordUpdateRequest.getEx();
+        this.imageUrl = wordUpdateRequest.getImageUrl();
+    }
 
 }

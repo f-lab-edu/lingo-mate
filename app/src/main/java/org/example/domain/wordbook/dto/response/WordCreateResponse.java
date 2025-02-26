@@ -6,16 +6,16 @@ import org.example.domain.wordbook.entity.Word;
 
 @Data
 @NoArgsConstructor
-public class WordResponse {
+public class WordCreateResponse {
     private String word;
     private String mean;
 
-    private WordResponse(Word word) {
+    private WordCreateResponse(Word word) {
         this.word = word.getWord();
         this.mean = word.getMean();
     }
 
-    public static WordResponse create(Word word) {
-        return new WordResponse(word);
+    public static WordCreateResponse create(Word word) {
+        return new WordCreateResponse(word);
     }
 }

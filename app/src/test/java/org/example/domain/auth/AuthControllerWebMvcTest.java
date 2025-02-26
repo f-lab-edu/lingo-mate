@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.RequestBuilder;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -39,14 +40,13 @@ public class AuthControllerWebMvcTest extends MockBeanInjection {
         // given
         MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
         Member member = MemberTestFixture.createMember();
-        when(memberService.addMember(any(MemberJoinRequest.class))).thenReturn(CompletableFuture.completedFuture(member));
+
+        when(authService.addMember(any(MemberJoinRequest.class))).thenReturn(member);
 
         // When & Then
-        MvcResult mvcResult = mockMvc.perform(post("/auth/join")
+        mockMvc.perform(post("/auth/join")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberJoinRequest))).andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
+                .content(objectMapper.writeValueAsString(memberJoinRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.email").value("valid@example.com"))
@@ -68,14 +68,12 @@ public class AuthControllerWebMvcTest extends MockBeanInjection {
         // given
         LoginRequest loginRequest = AuthTestFixture.createLoginRequest();
         TokenResponse tokenResponse = AuthTestFixture.createTokenResponse();
-        when(authService.issueToken(any(LoginRequest.class))).thenReturn(CompletableFuture.completedFuture(tokenResponse));
+        when(authService.issueToken(any(LoginRequest.class))).thenReturn(tokenResponse);
 
         // When & Then
-        MvcResult mvcResult = mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest))).andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Authorization", "Bearer " + tokenResponse.getAccessToken()))
                 .andExpect(jsonPath("$.accessToken").value(tokenResponse.getAccessToken()))
@@ -88,19 +86,16 @@ public class AuthControllerWebMvcTest extends MockBeanInjection {
         //Given
         RefreshRequest refreshRequest = AuthTestFixture.createRefreshRequest();
         TokenResponse tokenResponse = AuthTestFixture.createTokenResponse();
-        when(authService.reissueRefreshToken(refreshRequest)).thenReturn(CompletableFuture.completedFuture(tokenResponse));
-        //When & Then
-        MvcResult mvcResult = mockMvc.perform(post("/auth/refresh")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(refreshRequest))).andReturn();
+        when(authService.reissueRefreshToken(refreshRequest)).thenReturn(tokenResponse);
 
-        mockMvc.perform(asyncDispatch(mvcResult))
+        //When & Then
+        mockMvc.perform(post("/auth/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(refreshRequest)))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Authorization", "Bearer " + tokenResponse.getAccessToken()))
                 .andExpect(jsonPath("$.accessToken").value(tokenResponse.getAccessToken()))
                 .andExpect(jsonPath("$.refreshToken").value(tokenResponse.getRefreshToken()));
-
-
     }
 
 

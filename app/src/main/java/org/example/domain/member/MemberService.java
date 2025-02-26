@@ -19,37 +19,6 @@ import java.util.concurrent.CompletableFuture;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    //private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    // 회원가입
-    @Transactional
-    @Async
-    public CompletableFuture<Member> addMember(MemberJoinRequest memberJoinRequest){
-
-        /* 암호화
-        String password = memberJoinRequest.getPassword();
-        memberJoinRequest.setPassword(bCryptPasswordEncoder.encode(password));
-         */
-        System.out.println("service: " + Thread.currentThread().getName());
-        return CompletableFuture.supplyAsync(() -> {
-            System.out.println("service: " + Thread.currentThread().getName());
-
-            // 중복 로그인 체크
-            String username = memberJoinRequest.getUsername();
-            if(memberRepository.findByUsername(username).isPresent()) {
-                throw new RuntimeException("중복 사용자");
-            }
-
-            Member member = Member.createMember(memberJoinRequest);
-
-            for(String lang : memberJoinRequest.getLearning()) {
-                Language language = Language.createLanguage(lang);
-                member.addLearning(language);
-            }
-
-            return memberRepository.save(member);
-        });
-
-    }
 
     // 사용자 프로필 조회
     @Async

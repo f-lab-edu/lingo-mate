@@ -14,9 +14,15 @@ public interface AuthRepository extends JpaRepository<AuthEntity, Long> {
 
     Optional<AuthEntity> findByRefreshToken(String refreshToken);
     Optional<AuthEntity> findByAccessToken(String accessToken);
-    @Query("DELETE FROM AuthEntity a WHERE a.id = :autId")
+    @Query("DELETE FROM AuthEntity a WHERE a.id = :authId")
     @Modifying
-    void deleteByAuthId(@Param("auth_id") Long authId);
+    void deleteByAuthId(@Param("authId") Long authId);
+
+    @Query("DELETE FROM AuthEntity a WHERE a.id = :memberId")
+    @Modifying
+    void deleteByMemberId(@Param("memberId") Long memberId);
+
+    boolean existsByMemberId(Long memberId);
 
     @Modifying
     void deleteByRefreshToken(String refreshToken);
