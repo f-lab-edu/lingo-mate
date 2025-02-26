@@ -30,10 +30,11 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/join")
-    public ResponseEntity<MemberResponse> memberAdd(@Valid @RequestBody MemberJoinRequest memberJoinRequest) throws ExecutionException, InterruptedException {
-        Member member = authService.addMember(memberJoinRequest);
-        MemberResponse memberResponse = MemberResponse.createMemberResponse(member);
-        return ResponseEntity.status(HttpStatus.CREATED).body(memberResponse);
+    public CompletableFuture<ResponseEntity<MemberResponse>> memberAdd(@Valid @RequestBody MemberJoinRequest memberJoinRequest) throws ExecutionException, InterruptedException {
+        return authService.addMember(memberJoinRequest).thenApply(member -> {
+            MemberResponse memberResponse = MemberResponse.createMemberResponse(member);
+            return ResponseEntity.status(HttpStatus.CREATED).body(memberResponse);
+        });
     }
 
     @PostMapping("/login")

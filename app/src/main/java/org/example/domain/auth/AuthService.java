@@ -33,27 +33,33 @@ public class AuthService {
     private final AuthRepository authRepository;
     private final JWTUtil jwtUtil;
 
-    public Member addMember(MemberJoinRequest memberJoinRequest){
+    @Async
+    public CompletableFuture<Member> addMember(MemberJoinRequest memberJoinRequest){
 
-        /* 암호화
-        String password = memberJoinRequest.getPassword();
-        memberJoinRequest.setPassword(bCryptPasswordEncoder.encode(password));
-         */
+        return CompletableFuture.supplyAsync(() -> {
+            // 암호화 필요
 
-        // 중복 로그인 체크
-        String username = memberJoinRequest.getUsername();
-        if(memberRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("중복 사용자");
-        }
+            // 중복 로그인 체크
+            String username = memberJoinRequest.getUsername();
+            if(memberRepository.findByUsername(username).isPresent()) {
+                throw new RuntimeException("중복 사용자");
+            }
 
-        Member member = Member.createMember(memberJoinRequest);
+            // 멤버 생성
+            Member member = Member.createMember(memberJoinRequest);
 
-        for(String lang : memberJoinRequest.getLearning()) {
-            Language language = Language.createLanguage(lang);
-            member.addLearning(language);
-        }
+            // 연관관계 설정
+            for(String lang : memberJoinRequest.getLearning()) {
+                Language language = Language.createLanguage(lang);
+                member.addLearning(language);
+            }
 
-        return memberRepository.save(member);
+            // DB 저장
+            return memberRepository.save(member);
+        });
+
+
+
 
     }
 
