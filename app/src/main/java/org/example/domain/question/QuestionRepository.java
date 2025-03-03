@@ -17,4 +17,7 @@ import java.util.Optional;
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     Page<Question> findByMemberId(Pageable pageable, @Param("memberId") Long memberId);
     Optional<Member> findMemberById(@Param("id") Long id);
+
+    @Query("SELECT q FROM Question q LEFT JOIN FETCH q.comments WHERE q.id = :questionId")
+    Optional<Question> findByIdWithComments(@Param("questionId") Long questionId);
 }

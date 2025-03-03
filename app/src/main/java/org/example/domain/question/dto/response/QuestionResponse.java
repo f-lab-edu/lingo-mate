@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class QuestionResponse {
+    private Long questionId;
     private String questionLanguage;
     private String title;
     private String content;
@@ -15,6 +16,7 @@ public class QuestionResponse {
     private int point;
 
     private QuestionResponse(final Question question) {
+        this.questionId = question.getId();
         this.questionLanguage = question.getQuestionLanguage();
         this.title = question.getTitle();
         this.content = question.getContent();

@@ -2,9 +2,10 @@ package org.example.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.example.domain.auth.entity.AuthEntity;
-import org.example.domain.comment.Comment;
 import org.example.domain.language.Language;
+import org.example.domain.comment.Comment;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.question.entity.Question;
@@ -17,6 +18,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,6 +101,7 @@ public class Member {
     }
 
     public void addQuestion(Question question) {
+        log.debug("questions : {}", this.questions);
         this.questions.add(question);
         question.setMember(this); // 연관관계 주인 쪽에도 설정
     }

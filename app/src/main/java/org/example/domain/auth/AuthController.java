@@ -38,19 +38,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest loginRequest) {
-        TokenResponse tokenResponse = authService.issueToken(loginRequest);
-        return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
-                .body(tokenResponse);
+    public CompletableFuture<ResponseEntity<TokenResponse>> login(@RequestBody LoginRequest loginRequest) {
+        return authService.issueToken(loginRequest).thenApply(tokenResponse -> {
+            return ResponseEntity.ok()
+                    .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
+                    .body(tokenResponse);
+        });
 
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
-        TokenResponse tokenResponse = authService.reissueRefreshToken(refreshRequest);
-        return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
-                .body(tokenResponse);
+    public CompletableFuture<ResponseEntity<TokenResponse>> refresh(@RequestBody RefreshRequest refreshRequest) {
+        return authService.reissueRefreshToken(refreshRequest).thenApply(tokenResponse ->  {
+            return ResponseEntity.ok()
+                    .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
+                    .body(tokenResponse);
+        });
     }
 }

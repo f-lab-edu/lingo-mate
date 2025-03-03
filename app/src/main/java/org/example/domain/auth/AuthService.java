@@ -1,7 +1,6 @@
 package org.example.domain.auth;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.auth.dto.request.LoginRequest;
@@ -18,7 +17,6 @@ import org.example.domain.member.MemberRepository;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.entity.Member;
 import org.example.domain.member.entity.Role;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +31,6 @@ public class AuthService {
     private final AuthRepository authRepository;
     private final JWTUtil jwtUtil;
 
-    @Async
     public CompletableFuture<Member> addMember(MemberJoinRequest memberJoinRequest){
 
         return CompletableFuture.supplyAsync(() -> {
@@ -63,70 +60,76 @@ public class AuthService {
 
     }
 
-    public TokenResponse issueToken(final LoginRequest loginRequest) {
-        String email = loginRequest.getEmail();
+    public CompletableFuture<TokenResponse> issueToken(final LoginRequest loginRequest) {
 
-        // 이메일로 Member 조회
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("회원가입 되어 있지 않습니다."));
-        Long memberId = member.getId();
-        String username = member.getUsername();
-        log.debug("memberId = {}",memberId);
-        log.debug("username = {}",username);
+        return CompletableFuture.supplyAsync(() -> {
+            String email = loginRequest.getEmail();
 
-        // 이미 로그인 되었다가 다시 재로그인 하는 경우에는 기존 정보 삭제
-        if(authRepository.existsById(memberId)) {
-            authRepository.deleteByMemberId(memberId);
-        }
+            // 이메일로 Member 조회
+            Member member = memberRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("회원가입 되어 있지 않습니다."));
+            Long memberId = member.getId();
+            String username = member.getUsername();
+            log.debug("memberId = {}",memberId);
+            log.debug("username = {}",username);
 
-        // AccessToken, RefreshToken 생성
-        String accessToken = jwtUtil.createAccessToken(memberId, username, Role.USER);
-        String refreshToken = jwtUtil.createRefreshToken(memberId, username, Role.USER);
+            // 이미 로그인 되었다가 다시 재로그인 하는 경우에는 기존 정보 삭제
+            if(authRepository.existsById(memberId)) {
+                authRepository.deleteByMemberId(memberId);
+            }
 
-        // refreshToken DB 저장
-        AuthEntity authEntity = AuthEntity.createWith(refreshToken, accessToken);
-        authEntity.setMember(member);
-        authRepository.save(authEntity);
+            // AccessToken, RefreshToken 생성
+            String accessToken = jwtUtil.createAccessToken(memberId, username, Role.USER);
+            String refreshToken = jwtUtil.createRefreshToken(memberId, username, Role.USER);
 
-        // AccessToken, RefreshToken을 담은 LoginResponse를 컨트롤러에 전달
-        return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+            // refreshToken DB 저장
+            AuthEntity authEntity = AuthEntity.createWith(refreshToken, accessToken);
+            authEntity.setMember(member);
+            authRepository.save(authEntity);
+
+            // AccessToken, RefreshToken을 담은 LoginResponse를 컨트롤러에 전달
+            return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+        });
 
     }
 
-    public TokenResponse reissueRefreshToken(final RefreshRequest refreshRequest) {
-        String accessToken = refreshRequest.getAccessToken();
-        String refreshToken = refreshRequest.getRefreshToken();
+    public CompletableFuture<TokenResponse> reissueRefreshToken(final RefreshRequest refreshRequest) {
 
-        // refresh 만료 확인한다
-        try{
-            jwtUtil.isExpired(refreshToken);
-        } catch (ExpiredJwtException e) {
-            authRepository.deleteByRefreshToken(refreshToken);
-            throw new TokenExpired();
-        }
+        return CompletableFuture.supplyAsync(() -> {
+            String accessToken = refreshRequest.getAccessToken();
+            String refreshToken = refreshRequest.getRefreshToken();
 
-        //  Access Token, Refresh Token의 사용자 ID가 일치하는지 확인
-        if (!jwtUtil.getId(accessToken).equals(jwtUtil.getId(refreshToken))) {
-            throw new TokenIdsMismatchException();
-        }
+            // refresh 만료 확인한다
+            try{
+                jwtUtil.isExpired(refreshToken);
+            } catch (ExpiredJwtException e) {
+                authRepository.deleteByRefreshToken(refreshToken);
+                throw new TokenExpired();
+            }
 
-        // refreshToken으로 AuthEntity를 찾는다
-        AuthEntity authEntity = authRepository.findByRefreshToken(refreshToken).orElseThrow(RefreshTokenNotFound::new);
+            //  Access Token, Refresh Token의 사용자 ID가 일치하는지 확인
+            if (!jwtUtil.getId(accessToken).equals(jwtUtil.getId(refreshToken))) {
+                throw new TokenIdsMismatchException();
+            }
 
-        // AuthEntity로 Member를 찾는다
-        Member member = memberRepository.findById(authEntity.getId()).orElseThrow(UserNotFound::new);
+            // refreshToken으로 AuthEntity를 찾는다
+            AuthEntity authEntity = authRepository.findByRefreshToken(refreshToken).orElseThrow(RefreshTokenNotFound::new);
 
-        // Member 정보로 새로운 accessToken을 재발급한다.
-        String newAccessToken = jwtUtil.createAccessToken(member.getId(), member.getUsername(), member.getRole());
+            // AuthEntity로 Member를 찾는다
+            Member member = memberRepository.findById(authEntity.getId()).orElseThrow(UserNotFound::new);
 
-        // refreshToken을 파기한 후 다시 만들고 저정한다.
-        authRepository.deleteByAuthId(authEntity.getId());
-        String newRefreshToken = jwtUtil.createRefreshToken(member.getId(), member.getUsername(), member.getRole());
-        AuthEntity newAuthEntity = AuthEntity.createWith(accessToken, newRefreshToken);
-        newAuthEntity.setMember(member);
+            // Member 정보로 새로운 accessToken을 재발급한다.
+            String newAccessToken = jwtUtil.createAccessToken(member.getId(), member.getUsername(), member.getRole());
 
-        authRepository.save(newAuthEntity);
+            // refreshToken을 파기한 후 다시 만들고 저정한다.
+            authRepository.deleteByAuthId(authEntity.getId());
+            String newRefreshToken = jwtUtil.createRefreshToken(member.getId(), member.getUsername(), member.getRole());
+            AuthEntity newAuthEntity = AuthEntity.createWith(accessToken, newRefreshToken);
+            newAuthEntity.setMember(member);
 
-        return TokenResponse.builder().accessToken(newAccessToken).refreshToken(newRefreshToken).build();
+            authRepository.save(newAuthEntity);
+
+            return TokenResponse.builder().accessToken(newAccessToken).refreshToken(newRefreshToken).build();
+        });
 
     }
 

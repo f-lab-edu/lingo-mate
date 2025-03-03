@@ -2,12 +2,14 @@ package org.example.domain.wordbook.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class WordbookCreateRequest {
 
     @NotBlank(message = "제목은 반드시 입력해야 합니다.")
