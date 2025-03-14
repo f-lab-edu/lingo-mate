@@ -21,3 +21,6 @@ Lingo-Mate는 전세계 사람들과 함께 외국어 학습을 할 수 있는 �
 - Test
   - Mockito
   - Junit
+
+### ERD
+![lingomate (2)](https://github.com/user-attachments/assets/e4491aed-35d2-4151-9eb2-28ce95e07b2e)
