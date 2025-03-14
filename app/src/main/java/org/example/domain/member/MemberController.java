@@ -24,38 +24,20 @@ public class MemberController {
 
     // 사용자 프로필 조회, 사용자 기본 정보 제공
     @GetMapping("/{user_id}")
-    @Async
     public CompletableFuture<ResponseEntity<MemberResponse>> memberDetails(@PathVariable(value = "user_id") Long userId) {
-        return CompletableFuture.supplyAsync(() -> {
-            CompletableFuture<Member> member = memberService.findMember(userId);
-            MemberResponse memberResponse = null;
-            try {
-                memberResponse = MemberResponse.createMemberResponse(member.get());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-            return ResponseEntity.ok().body(memberResponse);
+
+        return memberService.findMember(userId).thenApply(member -> {
+            return ResponseEntity.ok().body(MemberResponse.createMemberResponse(member));
         });
+
     }
 
     // 사용자 프로필 수정
     @PutMapping("/{user_id}/edit")
     @Async
     public CompletableFuture<ResponseEntity<MemberResponse>> memberModify(@PathVariable(value = "user_id") Long userId, @Valid @RequestBody MemberEditRequest memberEditRequest) {
-        return CompletableFuture.supplyAsync(() -> {
-            CompletableFuture<Member> updateMember = memberService.modifyMember(userId, memberEditRequest);
-            MemberResponse memberResponse = null;
-            try {
-                memberResponse = MemberResponse.createMemberResponse(updateMember.get());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-            log.debug("{}", memberResponse.getId());
-            return ResponseEntity.ok().body(memberResponse);
+        return memberService.modifyMember(userId, memberEditRequest).thenApply(member -> {
+            return ResponseEntity.ok().body(MemberResponse.createMemberResponse(member));
         });
     }
 }

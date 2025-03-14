@@ -1,7 +1,6 @@
 package org.example.domain.auth;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.auth.dto.request.LoginRequest;
@@ -13,10 +12,11 @@ import org.example.domain.auth.exception.TokenExpired;
 import org.example.domain.auth.exception.TokenIdsMismatchException;
 import org.example.domain.auth.exception.UserNotFound;
 import org.example.domain.auth.jwt.JWTUtil;
+import org.example.domain.language.Language;
 import org.example.domain.member.MemberRepository;
+import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.entity.Member;
 import org.example.domain.member.entity.Role;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +30,41 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final AuthRepository authRepository;
     private final JWTUtil jwtUtil;
-    private final EntityManager em;
-    @Async
+
+    public CompletableFuture<Member> addMember(MemberJoinRequest memberJoinRequest){
+
+        return CompletableFuture.supplyAsync(() -> {
+            // 암호화 필요
+
+            // 중복 로그인 체크
+            String username = memberJoinRequest.getUsername();
+            if(memberRepository.findByUsername(username).isPresent()) {
+                throw new RuntimeException("중복 사용자");
+            }
+
+            // 멤버 생성
+            Member member = Member.createMember(memberJoinRequest);
+
+            // 연관관계 설정
+            for(String lang : memberJoinRequest.getLearning()) {
+                Language language = Language.createLanguage(lang);
+                member.addLearning(language);
+            }
+
+            // DB 저장
+            return memberRepository.save(member);
+        });
+
+
+
+
+    }
+
     public CompletableFuture<TokenResponse> issueToken(final LoginRequest loginRequest) {
+
         return CompletableFuture.supplyAsync(() -> {
             String email = loginRequest.getEmail();
+
             // 이메일로 Member 조회
             Member member = memberRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("회원가입 되어 있지 않습니다."));
             Long memberId = member.getId();
@@ -42,6 +72,10 @@ public class AuthService {
             log.debug("memberId = {}",memberId);
             log.debug("username = {}",username);
 
+            // 이미 로그인 되었다가 다시 재로그인 하는 경우에는 기존 정보 삭제
+            if(authRepository.existsById(memberId)) {
+                authRepository.deleteByMemberId(memberId);
+            }
 
             // AccessToken, RefreshToken 생성
             String accessToken = jwtUtil.createAccessToken(memberId, username, Role.USER);
@@ -58,7 +92,6 @@ public class AuthService {
 
     }
 
-    @Async
     public CompletableFuture<TokenResponse> reissueRefreshToken(final RefreshRequest refreshRequest) {
 
         return CompletableFuture.supplyAsync(() -> {
@@ -98,11 +131,9 @@ public class AuthService {
             return TokenResponse.builder().accessToken(newAccessToken).refreshToken(newRefreshToken).build();
         });
 
-
     }
 
-    @Async
     public boolean isValidAccessToken(String accessToken){
-        return authRepository.findByAccessToken(accessToken);
+        return authRepository.findByAccessToken(accessToken).isPresent();
     }
 }

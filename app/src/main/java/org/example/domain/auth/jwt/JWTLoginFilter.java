@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +30,11 @@ public class JWTLoginFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
 
         // /auth 경로는 로그인 필터를 적용하지 않는다.
-        if(requestURI.startsWith("/auth/") || requestURI.equals("/api/question/all")) {
+        if(requestURI.startsWith("/auth/")
+                || requestURI.equals("/api/question/all")
+                || requestURI.equals("/api/wordbook/all")
+
+        ) {
             filterChain.doFilter(request,response);
             return;
         }
@@ -50,6 +56,7 @@ public class JWTLoginFilter extends OncePerRequestFilter {
 
         // DB에서 AccessToken 검증
         boolean isTokenValid = authService.isValidAccessToken(token);
+
         if (!isTokenValid) {
             log.debug("Token not found in DB or invalid");
             throw new AccessTokenNotFound();

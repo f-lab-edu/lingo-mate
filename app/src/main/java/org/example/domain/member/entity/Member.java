@@ -2,13 +2,14 @@ package org.example.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.example.domain.auth.entity.AuthEntity;
-import org.example.domain.comment.Comment;
 import org.example.domain.language.Language;
+import org.example.domain.comment.Comment;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.question.entity.Question;
-import org.example.domain.wordbook.entity.WordBook;
+import org.example.domain.wordbook.entity.Wordbook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +48,7 @@ public class Member {
     private List<Question> questions = new ArrayList<Question>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WordBook> wordbooks = new ArrayList<WordBook>();
+    private List<Wordbook> wordbooks = new ArrayList<Wordbook>();
 
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private AuthEntity authEntity;
@@ -99,6 +101,7 @@ public class Member {
     }
 
     public void addQuestion(Question question) {
+        log.debug("questions : {}", this.questions);
         this.questions.add(question);
         question.setMember(this); // 연관관계 주인 쪽에도 설정
     }
@@ -108,12 +111,12 @@ public class Member {
         question.setMember(null); // 연관관계 제거
     }
 
-    public void addWordBook(WordBook wordBook) {
+    public void addWordBook(Wordbook wordBook) {
         this.wordbooks.add(wordBook);
         wordBook.setMember(this); // 연관관계 주인 쪽에도 설정
     }
 
-    public void removeWordBook(WordBook wordBook) {
+    public void removeWordBook(Wordbook wordBook) {
         this.wordbooks.remove(wordBook);
         wordBook.setMember(null); // 연관관계 제거
     }

@@ -9,8 +9,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    show-sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
   jwt:
     secret: 636E385229FF3D2E43E4362356D1fggQweRT123 #HS256 (key >= 32*8)
 server:

@@ -147,14 +147,12 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         // When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        when(questionService.removeQuestion(anyLong(), anyLong()))
-                .thenReturn(CompletableFuture.completedFuture(null));
+        doNothing().when(questionService).removeQuestion(anyLong(), anyLong());
 
         // Then
-        MvcResult mvcResult = mockMvc.perform(delete("/api/question/{question_id}/delete", questionId)
+        mockMvc.perform(delete("/api/question/{question_id}/delete", questionId)
                 .header(AUTHORIZATION, token)
-                .contentType(MediaType.APPLICATION_JSON)).andReturn();
-        mockMvc.perform(asyncDispatch(mvcResult))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()); // HTTP 200 상태 코드 확인
     }
 
@@ -230,14 +228,13 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         // When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        when(questionService.removeComment(questionId,commentId,memberId)).thenReturn(CompletableFuture.completedFuture(null));
+        doNothing().when(questionService).removeComment(questionId,commentId,memberId);
+
 
         // Then
-        MvcResult mvcResult = mockMvc.perform(delete("/api/question/{question_id}/comments/{comment_id}", questionId, commentId)
+        mockMvc.perform(delete("/api/question/{question_id}/comments/{comment_id}", questionId, commentId)
                 .header(AUTHORIZATION, token)
-                .contentType(MediaType.APPLICATION_JSON)).andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()); // HTTP 200 상태 코드 확인
 
     }

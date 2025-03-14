@@ -65,10 +65,11 @@ class AuthServiceTest {
 
 
         // When
-        CompletableFuture<TokenResponse> tokenResponse = authService.issueToken(loginRequest);
+        CompletableFuture<TokenResponse> future = authService.issueToken(loginRequest);
+        String refreshToken = future.get().getRefreshToken();
+
         // Then
-        String refreshToken = tokenResponse.get().getRefreshToken();
-        assertThat(authRepository.findByRefreshToken(refreshToken).get()).isNotNull();
+        assertThat(authRepository.findByRefreshToken(refreshToken)).isNotNull();
     }
 
     @Test
@@ -94,7 +95,6 @@ class AuthServiceTest {
         doNothing().when(authRepository).deleteByAuthId(any());
         when(jwtUtil.createRefreshToken(any(), eq(member.getUsername()), eq(member.getRole()))).thenReturn(newRefreshToken);
         when(authRepository.save(any(AuthEntity.class))).thenReturn(authEntity);
-
 
         //when
         CompletableFuture<TokenResponse> tokenResponse = authService.reissueRefreshToken(refreshRequest);

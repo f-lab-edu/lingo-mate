@@ -28,51 +28,31 @@ import java.util.concurrent.ExecutionException;
 public class AuthController {
 
     private final AuthService authService;
-    private final MemberService memberService;
+
     @PostMapping("/join")
-    @Async
-    public CompletableFuture<ResponseEntity<MemberResponse>> memberAdd(@Valid @RequestBody MemberJoinRequest memberJoinRequest) {
-        System.out.println("controller: " + Thread.currentThread().getName());
-        return CompletableFuture.supplyAsync(() -> {
-            System.out.println("controller: " + Thread.currentThread().getName());
-            CompletableFuture<Member> savedMember = memberService.addMember(memberJoinRequest);
-
-            try {
-                MemberResponse memberResponse = MemberResponse.createMemberResponse(savedMember.get());
-                return ResponseEntity.status(HttpStatus.CREATED).body(memberResponse);
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+    public CompletableFuture<ResponseEntity<MemberResponse>> memberAdd(@Valid @RequestBody MemberJoinRequest memberJoinRequest) throws ExecutionException, InterruptedException {
+        return authService.addMember(memberJoinRequest).thenApply(member -> {
+            MemberResponse memberResponse = MemberResponse.createMemberResponse(member);
+            return ResponseEntity.status(HttpStatus.CREATED).body(memberResponse);
         });
-
     }
 
     @PostMapping("/login")
-    @Async
     public CompletableFuture<ResponseEntity<TokenResponse>> login(@RequestBody LoginRequest loginRequest) {
-        return CompletableFuture.supplyAsync(() -> {
-            CompletableFuture<TokenResponse> tokenResponse = authService.issueToken(loginRequest);
-            try {
-                return ResponseEntity.ok()
-                        .header("Authorization","Bearer " + tokenResponse.get().getAccessToken())
-                        .body(tokenResponse.get());
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+        return authService.issueToken(loginRequest).thenApply(tokenResponse -> {
+            return ResponseEntity.ok()
+                    .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
+                    .body(tokenResponse);
         });
+
     }
 
     @PostMapping("/refresh")
-    @Async
     public CompletableFuture<ResponseEntity<TokenResponse>> refresh(@RequestBody RefreshRequest refreshRequest) {
-        return CompletableFuture.supplyAsync(() -> {
-            CompletableFuture<TokenResponse> tokenResponse = authService.reissueRefreshToken(refreshRequest);
-            try {
-                return ResponseEntity.ok().header("Authorization", "Bearer " + tokenResponse.get().getAccessToken())
-                        .body(tokenResponse.get());
-            } catch (InterruptedException| ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+        return authService.reissueRefreshToken(refreshRequest).thenApply(tokenResponse ->  {
+            return ResponseEntity.ok()
+                    .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
+                    .body(tokenResponse);
         });
     }
 }
