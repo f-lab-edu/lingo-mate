@@ -109,6 +109,9 @@ public class QuestionService {
             return comment;
         });
     }
+
+
+    // 질문 댓글 조회
     public CompletableFuture<List<Comment>> getCommentList(Long questionId) {
         return CompletableFuture.supplyAsync(() -> {
             // 질문에 달린 댓글들을 조회한다.
@@ -129,8 +132,7 @@ public class QuestionService {
 
             // 댓글을 수정한다
             Comment editedComment = comment.editComment(commentRequest);
-            commentRepository.save(editedComment);
-            return editedComment;
+            return commentRepository.save(editedComment);
         });
     }
 

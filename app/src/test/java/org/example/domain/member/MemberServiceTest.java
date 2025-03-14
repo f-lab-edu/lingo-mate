@@ -1,23 +1,17 @@
 package org.example.domain.member;
 
-import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.language.Language;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.entity.Member;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;

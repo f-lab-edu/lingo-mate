@@ -3,6 +3,7 @@ package org.example.domain.question;
 import org.assertj.core.api.Assertions;
 import org.example.domain.comment.Comment;
 import org.example.domain.comment.CommentRepository;
+import org.example.domain.member.MemberRepository;
 import org.example.domain.member.MemberService;
 import org.example.domain.member.MemberTestFixture;
 import org.example.domain.member.entity.Member;
@@ -43,6 +44,9 @@ class QuestionServiceTest {
     private MemberService memberService;
 
     @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
     private CommentRepository commentRepository;
 
     @Test
@@ -53,7 +57,7 @@ class QuestionServiceTest {
         Long memberId = 1L;
 
         //Mocking
-        when(memberService.findMember(any(Long.class))).thenReturn(CompletableFuture.completedFuture(mockMember));
+        when(memberRepository.findByIdWithQuestions(any(Long.class))).thenReturn(Optional.of(mockMember));
 
         //When
         QuestionResponse questionResponse = questionService.addQuestion(questionCreateRequest, memberId).get();
@@ -116,6 +120,7 @@ class QuestionServiceTest {
         Question question = QuestionTestFixture.createQuestion(); // 생성된 Question의 memberId은 OL로 설정됨.
         //Mocking
         when(questionRepository.findById(any(Long.class))).thenReturn(Optional.of(question));
+        when(questionRepository.save(any())).thenReturn(question);
         //When
         Question modifiedQuestion = questionService.modifyQuestion(memberId, questionId, questionEditRequest).get();
         //Then
@@ -153,8 +158,8 @@ class QuestionServiceTest {
         member.addComment(comment);
 
         //Mocking
-        when(questionRepository.findById(anyLong())).thenReturn(Optional.of(question));
-        when(memberService.findMember(any(Long.class))).thenReturn(CompletableFuture.completedFuture(member));
+        when(questionRepository.findByIdWithComments(anyLong())).thenReturn(Optional.of(question));
+        when(memberRepository.findByIdWithComments(anyLong())).thenReturn(Optional.of(member));
 
         //When
         Comment addedComment = questionService.addComment(questionId, memberId, commentRequest).get();
@@ -172,6 +177,7 @@ class QuestionServiceTest {
         Long memberId = 1L;
         CommentRequest commentRequest = CommentTestFixture.createEditCommentRequest();
         Comment comment = CommentTestFixture.createComment();
+        Comment editedComment = comment.editComment(commentRequest);
         Question question = QuestionTestFixture.createQuestion();
         Member member = MemberTestFixture.createMember();
 
@@ -180,7 +186,8 @@ class QuestionServiceTest {
         member.addComment(comment);
 
         //Mocking
-        when(questionRepository.findById(anyLong())).thenReturn(Optional.of(question));
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
+        when(commentRepository.save(any(Comment.class))).thenReturn(editedComment);
 
         //When
         Comment modifiedComment = questionService.modifyComment(questionId, commentId, memberId, commentRequest).get();
@@ -204,14 +211,13 @@ class QuestionServiceTest {
         member.addComment(comment);
 
         //Mocking
-        when(questionRepository.findById(anyLong())).thenReturn(Optional.of(question));
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
 
         //When
-        questionService.removeComment(questionId,commentId,memberId).get();
+        questionService.removeComment(questionId,commentId,memberId);
 
         //Then
         verify(commentRepository, times(1)).deleteById(anyLong());
-
 
     }
 }

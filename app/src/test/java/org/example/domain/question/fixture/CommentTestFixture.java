@@ -1,7 +1,6 @@
 package org.example.domain.question.fixture;
 
 import org.example.domain.comment.Comment;
-import org.example.domain.member.MemberTestFixture;
 import org.example.domain.question.dto.request.CommentRequest;
 
 public class CommentTestFixture {
