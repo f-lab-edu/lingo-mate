@@ -1,22 +1,18 @@
 package org.example.domain.member;
 
-import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.language.Language;
 import org.example.domain.member.dto.request.MemberEditRequest;
 import org.example.domain.member.dto.request.MemberJoinRequest;
 import org.example.domain.member.entity.Member;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,7 +27,7 @@ class MemberServiceTest {
     private MemberRepository memberRepository;
 
     @Test
-    void userId로_사용자를_조회한다() {
+    void userId로_사용자를_조회한다() throws ExecutionException, InterruptedException {
         //Given
         MemberJoinRequest memberJoinRequest = MemberTestFixture.createMemberJoinRequest();
         Member mockMember = MemberTestFixture.createMember();
@@ -40,14 +36,14 @@ class MemberServiceTest {
         when(memberRepository.findById(any(Long.class))).thenReturn(Optional.of(mockMember));
 
         //When
-        Member findMember = memberService.findMember(mockMember.getId());
+        Member member = memberService.findMember(mockMember.getId()).get();
 
         //Then
-        assertThat(findMember.getId()).isEqualTo(mockMember.getId());
+        assertThat(member.getId()).isEqualTo(mockMember.getId());
     }
 
     @Test
-    void userId와_MemberEditRequest로_사용자_프로필을_수정한다() {
+    void userId와_MemberEditRequest로_사용자_프로필을_수정한다() throws ExecutionException, InterruptedException {
         //Given
         MemberEditRequest memberEditRequest = MemberTestFixture.createMemberEditRequest();
         Member mockMember = MemberTestFixture.createMember();
@@ -56,10 +52,10 @@ class MemberServiceTest {
         when(memberRepository.findById(any(Long.class))).thenReturn(Optional.of(mockMember));
 
         //When
-        Member editMember = memberService.modifyMember(mockMember.getId(), memberEditRequest);
+        Member editMember = memberService.modifyMember(mockMember.getId(), memberEditRequest).get();
 
         //Then
-        assertThat(editMember).isEqualTo(editMember);
+        assertThat(editMember).isEqualTo(mockMember);
 
         // 배우는 언어가 "fr", "ja"에서 "es", "cn"으로 바뀌는지 확인
         assertThat(editMember.getLearnings())

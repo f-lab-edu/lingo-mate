@@ -21,7 +21,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginCheckInterceptor)
                 .order(1)
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/auth/**","/api/question/all");
+                .excludePathPatterns("/auth/**","/api/question/all", "/api/wordbook/all");
     }
 
     @Override

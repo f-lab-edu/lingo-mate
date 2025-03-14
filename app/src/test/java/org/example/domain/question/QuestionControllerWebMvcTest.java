@@ -21,6 +21,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -48,13 +51,15 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         //When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        when(questionService.addQuestion(any(), any())).thenReturn(questionResponse);
+        when(questionService.addQuestion(any(), any())).thenReturn(CompletableFuture.completedFuture(questionResponse));
 
         //Then
-        mockMvc.perform(post("/api/question/create")
-                        .header(AUTHORIZATION, token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(questionCreateRequest)))
+        MvcResult mvcResult = mockMvc.perform(post("/api/question/create")
+                .header(AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(questionCreateRequest))).andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.questionLanguage").value("en"))
                 .andExpect(jsonPath("$.title").value("what does slay means?"))
@@ -70,13 +75,15 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         //When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        when(questionService.findAllQuestion(any(Pageable.class))).thenReturn(page);
+        when(questionService.findAllQuestion(any(Pageable.class))).thenReturn(CompletableFuture.completedFuture(page));
 
         //Then
-        mockMvc.perform(get("/api/question/all")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
+        MvcResult mvcResult = mockMvc.perform(get("/api/question/all")
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON)).andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(20))
                 .andExpect(jsonPath("$.number").value(0))
@@ -91,14 +98,16 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         //When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        when(questionService.findQuestionByMemberId(any(Pageable.class), any(Long.class))).thenReturn(page);
+        when(questionService.findQuestionByMemberId(any(Pageable.class), any(Long.class))).thenReturn(CompletableFuture.completedFuture(page));
 
         //Then
-        mockMvc.perform(get("/api/question/my-questions")
-                        .param("page", "1")
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(AUTHORIZATION, token))
+        MvcResult mvcResult = mockMvc.perform(get("/api/question/my-questions")
+                .param("page", "1")
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(AUTHORIZATION, token)).andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(20))
                 .andExpect(jsonPath("$.number").value(1))
@@ -114,13 +123,15 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         //When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        when(questionService.modifyQuestion(any(Long.class),any(Long.class), any(QuestionEditRequest.class))).thenReturn(editedQuestion);
+        when(questionService.modifyQuestion(any(Long.class),any(Long.class), any(QuestionEditRequest.class))).thenReturn(CompletableFuture.completedFuture(editedQuestion));
 
         //Then
-        mockMvc.perform(put("/api/question/0/edit")
-                .header(AUTHORIZATION,token)
+        MvcResult mvcResult = mockMvc.perform(put("/api/question/0/edit")
+                .header(AUTHORIZATION, token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(questionEditRequest)))
+                .content(objectMapper.writeValueAsString(questionEditRequest))).andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.questionLanguage").value("ja"))
                 .andExpect(jsonPath("$.title").value("ありがとう"))
@@ -136,12 +147,12 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         // When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        doNothing().when(questionService).removeQuestion(memberId, questionId);
+        doNothing().when(questionService).removeQuestion(anyLong(), anyLong());
 
         // Then
-        mockMvc.perform(delete("/api/question/{question_id}/delete",questionId)
-                        .header(AUTHORIZATION, token)
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(delete("/api/question/{question_id}/delete", questionId)
+                .header(AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()); // HTTP 200 상태 코드 확인
     }
 
@@ -159,13 +170,15 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         //When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        when(questionService.addComment(anyLong(), anyLong(), any())).thenReturn(comment);
+        when(questionService.addComment(anyLong(), anyLong(), any())).thenReturn(CompletableFuture.completedFuture(comment));
 
         //Then
-        mockMvc.perform(post("/api/question/0/comments")
-                .header(AUTHORIZATION,token)
+        MvcResult mvcResult = mockMvc.perform(post("/api/question/0/comments")
+                .header(AUTHORIZATION, token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(commentRequest)))
+                .content(objectMapper.writeValueAsString(commentRequest))).andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.comment").value("댓글1"))
                 .andExpect(jsonPath("$.memberId").value(1L))
@@ -191,13 +204,14 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
 
         //When
         when(authService.isValidAccessToken("Token")).thenReturn(true);
-        when(questionService.modifyComment(anyLong(), anyLong(), anyLong(), any())).thenReturn(editComment);
+        when(questionService.modifyComment(anyLong(), anyLong(), anyLong(), any())).thenReturn(CompletableFuture.completedFuture(editComment));
 
         //Then
-        mockMvc.perform(put("/api/question/0/comments/0")
-                        .header(AUTHORIZATION,token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(editCommentRequest)))
+        MvcResult mvcResult = mockMvc.perform(put("/api/question/0/comments/0")
+                .header(AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(editCommentRequest))).andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.comment").value("수정 댓글1"))
                 .andExpect(jsonPath("$.memberId").value(1L))
@@ -216,10 +230,11 @@ class QuestionControllerWebMvcTest extends MockBeanInjection {
         when(authService.isValidAccessToken("Token")).thenReturn(true);
         doNothing().when(questionService).removeComment(questionId,commentId,memberId);
 
+
         // Then
-        mockMvc.perform(delete("/api/question/{question_id}/comments/{comment_id}", questionId,commentId)
-                        .header(AUTHORIZATION, token)
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(delete("/api/question/{question_id}/comments/{comment_id}", questionId, commentId)
+                .header(AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()); // HTTP 200 상태 코드 확인
 
     }
