@@ -23,4 +23,4 @@ Lingo-Mate는 전세계 사람들과 함께 외국어 학습을 할 수 있는 �
   - Junit
 
 ### ERD
-![lingomate (2)](https://github.com/user-attachments/assets/e4491aed-35d2-4151-9eb2-28ce95e07b2e)
+![lingomate (4)](https://github.com/user-attachments/assets/b153398f-71bd-4423-9da1-323016d447bd)
