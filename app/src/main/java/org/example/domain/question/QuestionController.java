@@ -35,7 +35,6 @@ public class QuestionController {
         return questionService.addQuestion(questionCreateRequest, memberId).thenApply(questionResponse -> {
             return ResponseEntity.ok().body(questionResponse);
         });
-
     }
 
     // 질문 목록 조회
@@ -69,7 +68,7 @@ public class QuestionController {
     // 질문 수정
     @PutMapping("/{question_id}/edit")
     public CompletableFuture<ResponseEntity<QuestionResponse>> questionModify(@LoginMember Long memberId, @PathVariable(value = "question_id") Long questionId,
-                                                           @RequestBody QuestionEditRequest questionEditRequest) {
+                                                                              @RequestBody QuestionEditRequest questionEditRequest) {
 
         return questionService.modifyQuestion(memberId,questionId,questionEditRequest).thenApply(question -> {
             QuestionResponse questionResponse = QuestionResponse.create(question);
@@ -126,12 +125,13 @@ public class QuestionController {
                                               @LoginMember Long memberId) {
         questionService.removeComment(questionId, commentId, memberId);
         return ResponseEntity.ok().build();
+
     }
 
-    // 질문 검색???
+    /* 질문 검색???
     @GetMapping("/search")
     public void questionSearch(@RequestParam("keyword") String keyword) {
 
     }
-
+    */
 }
